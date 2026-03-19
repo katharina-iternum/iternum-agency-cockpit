@@ -160,7 +160,11 @@ function renderBars(elId, items, valueKey, colorFn, formatFn){
 async function render(){
   renderTabs();
   const defs=SOURCES[currentTab];
-  const datasets=await Promise.all(defs.map(async d => ({...d, parsed: parseHarvest(d.dept, await fetchGviz(d.id,d.sheet)) })));
+  const datasets=[];
+  for (const d of defs) {
+    const raw = await fetchGviz(d.id, d.sheet);
+    datasets.push({ ...d, parsed: parseHarvest(d.dept, raw) });
+  }
   const rows=datasets.flatMap(d=>d.parsed.records);
   const monthLabel=datasets[0]?.parsed.monthCol||'Current';
   const agreed=sum(rows,'agreed'), used=sum(rows,'used'), diff=sum(rows,'diff');
@@ -199,7 +203,10 @@ async function render(){
   ];
   document.getElementById('actionTable').innerHTML = actions.map(a=>`<tr><td>${a.area}</td><td>${a.text}</td></tr>`).join('');
 }
-render();
+render().catch(err => {
+  document.getElementById('heroStat').textContent = 'Load error';
+  document.getElementById('heroCopy').textContent = err.message || String(err);
+});
 </script>
 </body>
 </html>
