@@ -83,6 +83,24 @@
       <table><thead><tr><th>Area</th><th>Action</th></tr></thead><tbody id="actionTable"></tbody></table>
     </div>
   </div>
+
+  <div class="layout" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="panel">
+      <div class="section-title">COO special view</div>
+      <h3>Klippekort overview</h3>
+      <table><thead><tr><th>Project</th><th>Agreed</th><th>Left</th></tr></thead><tbody id="klippekortTable"></tbody></table>
+    </div>
+    <div class="panel">
+      <div class="section-title">COO special view</div>
+      <h3>Medgået tid overview</h3>
+      <table><thead><tr><th>Project</th><th>Used</th><th>Status</th></tr></thead><tbody id="medgaaetTable"></tbody></table>
+    </div>
+    <div class="panel">
+      <div class="section-title">COO special view</div>
+      <h3>Possible missing time tracking</h3>
+      <table><thead><tr><th>Project</th><th>Agreed</th><th>Used</th></tr></thead><tbody id="missingTable"></tbody></table>
+    </div>
+  </div>
 </div>
 <script>
 const SOURCES = {
@@ -199,9 +217,18 @@ async function render(){
     {area:'Overdelivery', text: over ? `${over} clients are already over their agreed hours and need action now.` : 'No clients are currently over their agreed hours.'},
     {area:'Warning zone', text: warning ? `${warning} clients are close to their limit (≤2 hours remaining).` : 'No clients are close to the limit right now.'},
     {area:'Focus', text: currentTab==='COO Master' ? 'Use this view to compare where intervention is needed across departments.' : `Use this view to rebalance workload and client scope inside ${currentTab}.`},
-    {area:'Data source', text: `Live from Google Sheets · month column detected as “${monthLabel}”.`}
+    {area:'Data source', text: `Department comparison uses live Harvest sheet hours, summed by department. Google Ads is shown as summed hours, not split by consultant.`}
   ];
   document.getElementById('actionTable').innerHTML = actions.map(a=>`<tr><td>${a.area}</td><td>${a.text}</td></tr>`).join('');
+
+  const klippekort = clientAgg.filter(c => /klippekort/i.test(c.name)).sort((a,b)=>a.diff-b.diff).slice(0,12);
+  document.getElementById('klippekortTable').innerHTML = klippekort.length ? klippekort.map(c => `<tr><td>${c.name}</td><td>${fmt(c.agreed)}</td><td>${fmt(c.diff)}</td></tr>`).join('') : '<tr><td colspan="3">No klippekort rows in this live view.</td></tr>';
+
+  const medgaaet = clientAgg.filter(c => /medgået tid|medgaaet tid/i.test(c.name)).sort((a,b)=>b.used-a.used).slice(0,12);
+  document.getElementById('medgaaetTable').innerHTML = medgaaet.length ? medgaaet.map(c => `<tr><td>${c.name}</td><td>${fmt(c.used)}</td><td>${c.used > 0 ? statusPill('green','Tracked') : statusPill('yellow','No hours')}</td></tr>`).join('') : '<tr><td colspan="3">No “Medgået tid” rows in this live view.</td></tr>';
+
+  const missing = clientAgg.filter(c => c.agreed > 0 && c.used === 0).sort((a,b)=>b.agreed-a.agreed).slice(0,12);
+  document.getElementById('missingTable').innerHTML = missing.length ? missing.map(c => `<tr><td>${c.name}</td><td>${fmt(c.agreed)}</td><td>${fmt(c.used)}</td></tr>`).join('') : '<tr><td colspan="3">No obvious missing-tracking rows in this live view.</td></tr>';
 }
 render().catch(err => {
   document.getElementById('heroStat').textContent = 'Load error';
