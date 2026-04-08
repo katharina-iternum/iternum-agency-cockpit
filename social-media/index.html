@@ -82,7 +82,7 @@
     <div>
       <div class="eyebrow">Afdelingsdashboard</div>
       <h1>Social Media · Kundetidsoverblik</h1>
-      <div class="sub">Viser hvilke kunder der bruger for meget tid i Social Media, plus et konsulentoverblik i samme stil som ressourcestyringen. Pro bono beregnes som overforbrugte timer × 1.145 DKK/time. Dashboardet linker ikke videre til andre afdelinger.</div>
+      <div class="sub">Live overblik for Social Media.</div>
     </div>
   </div>
 
@@ -90,7 +90,7 @@
 
   <div class="panel" style="margin-bottom:24px;">
     <div class="section-title">Konsulentressourcer</div>
-    <div class="muted" style="margin-bottom:18px">Bookingprocent og bookede timer fra ressourcearket · kundeforbrug og pro bono fra live Harvest-data</div>
+    <div class="muted" style="margin-bottom:18px">Kapacitet, booking, OT og kundepres for måneden.</div>
     <div class="consultant-grid" id="consultantGrid"></div>
   </div>
 
@@ -133,11 +133,24 @@ const SHEET_ID = '18zsYYyOQAaZJjFMNtkO4jcdgMS6xwxwi-Z7ml9F-skM';
 const SHEET_NAME = 'Social Media tid 2026';
 const HOURLY_RATE = 1145;
 const CAPACITY_TARGET = 114;
+const RESOURCE_SHEET_IDS = {
+  'Google Ads': '1dzMMRKg0oGOgW_eZgfbb2ieryQRHFGykSCt0zEOtoaU',
+  'SEO': '1qfnnsgyMzFuXSAFiUwaV1vo0AtiW188ykl8K00SDPcY',
+  'Social Media': '1KmCy-hHNPaGtZz7BX-IxOLQdvH8NKbT5I3PSDEIlV7k'
+};
 const MONTH_RE = /januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december/i;
 const fmt1 = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
 const fmtPct = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
 const fmtDkk = n => new Intl.NumberFormat('da-DK',{maximumFractionDigits:0}).format(Math.round(Number(n||0)));
-const num = v => { if(v==null||v==='') return 0; if(typeof v==='number') return v; return Number(String(v).replace(/\./g,'').replace(',','.')) || 0; };
+const num = v => {
+  if (v == null || v === '') return 0;
+  if (typeof v === 'number') return v;
+  const s = String(v).trim();
+  if (!s) return 0;
+  if (s.includes(',') && s.includes('.')) return Number(s.replace(/\./g,'').replace(',','.')) || 0;
+  if (s.includes(',')) return Number(s.replace(',','.')) || 0;
+  return Number(s) || 0;
+};
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const initials = name => name.split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0]).join('').toUpperCase();
 function statusPill(kind, text){ return `<span class="pill ${kind}">${text}</span>`; }
@@ -184,9 +197,7 @@ async function fetchGviz(id, sheet){
   });
 }
 async function fetchResourceData(){
-  const res = await fetch('./resource-data.json', { cache: 'no-store' });
-  if (!res.ok) throw new Error('Kunne ikke hente resource-data.json');
-  return res.json();
+  return fetchGviz(RESOURCE_SHEET_IDS[DEPARTMENT], 'Kundefordeling');
 }
 function parseHarvest(raw){
   const monthIndices = raw.cols.map((c, i) => MONTH_RE.test(c) ? i : -1).filter(i => i >= 0);
@@ -224,71 +235,105 @@ function buildClientAgg(records){
   }).sort((a,b) => (b.proBonoHours - a.proBonoHours) || (b.used - a.used));
 }
 function parseResourceSheet(data){
-  const rows = data.values || [];
+  const rows = data.rows || [];
   const defs = {
     'Google Ads': [
-      { name: 'Claes', customerCol: 5, hourCol: 6 },
-      { name: 'Rasmus', customerCol: 13, hourCol: 14 },
-      { name: 'Hanne', customerCol: 24, hourCol: 25 },
-      { name: 'Giovanni', customerCol: 36, hourCol: 38 }
+      { name: 'Claes', customerCol: 5, mrrCol: 6, otCol: null },
+      { name: 'Rasmus', customerCol: 13, mrrCol: 14, otCol: null },
+      { name: 'Hanne', customerCol: 24, mrrCol: 25, otCol: null },
+      { name: 'Giovanni', customerCol: 36, mrrCol: 38, otCol: null }
     ],
     'SEO': [
-      { name: 'Anton', customerCol: 5, hourCol: 6 },
-      { name: 'Andreas', customerCol: 11, hourCol: 12 }
+      { name: 'Anton', customerCol: 5, mrrCol: 6, otCol: 8 },
+      { name: 'Andreas', customerCol: 11, mrrCol: 12, otCol: 14 }
     ],
     'Social Media': [
-      { name: 'Daniel', customerCol: 5, hourCol: 6 },
-      { name: 'Jacob', customerCol: 10, hourCol: 11 },
-      { name: 'Nana', customerCol: 18, hourCol: 19 },
-      { name: 'Katharina', customerCol: 24, hourCol: 25 }
+      { name: 'Daniel', customerCol: 5, mrrCol: 6, otCol: 7 },
+      { name: 'Jacob', customerCol: 10, mrrCol: 11, otCol: 12 },
+      { name: 'Nana', customerCol: 18, mrrCol: 19, otCol: 20 }
     ]
   };
-  return (defs[DEPARTMENT] || []).map(def => {
+  const consultants = (defs[DEPARTMENT] || []).map(def => {
     const clients = [];
+    let targetHours = CAPACITY_TARGET;
+    let bookedMRR = 0;
+    let bookedOT = 0;
+    let remainingMRR = null;
+    let remainingOT = null;
+
     for (const row of rows) {
-      const client = String(row?.[def.customerCol] || '').trim();
-      const hours = num(row?.[def.hourCol]);
-      if (!client || /^kunder$/i.test(client) || /^rating/i.test(client) || /^mål for/i.test(client) || /^bookning/i.test(client) || /^total/i.test(client)) continue;
-      if (!hours && !/[a-zæøå]/i.test(client)) continue;
-      if (client.length < 2) continue;
-      clients.push({ client, hours });
+      const label = String(row?.[def.customerCol] || '').trim();
+      if (!label) continue;
+      const mrr = num(row?.[def.mrrCol]);
+      const ot = def.otCol == null ? 0 : num(row?.[def.otCol]);
+      if (/Timer til rådighed månedligt/i.test(label)) {
+        targetHours = mrr || targetHours;
+        continue;
+      }
+      if (/Timer pr\. måned booket/i.test(label)) {
+        bookedMRR = mrr;
+        bookedOT = ot;
+        continue;
+      }
+      if (/Rest\s*timer til rådighed månedligt/i.test(label)) {
+        remainingMRR = mrr;
+        remainingOT = ot;
+        continue;
+      }
+      if (/^kunder$/i.test(label) || /^rating/i.test(label) || /^mål for/i.test(label) || /^bookning/i.test(label) || /^totale/i.test(label) || /^opsagt/i.test(label) || /^tilbud/i.test(label)) continue;
+      if (label.length < 2) continue;
+      clients.push({ client: label, mrr, ot });
     }
-    const bookedHours = clients.reduce((a,c) => a + c.hours, 0);
-    const bookingPct = CAPACITY_TARGET > 0 ? bookedHours / CAPACITY_TARGET * 100 : 0;
-    return { name: def.name, customers: clients.length, bookedHours, bookingPct, remaining: CAPACITY_TARGET - bookedHours };
+
+    const otProjects = clients.filter(c => c.ot > 0).length;
+    const otHours = clients.reduce((a,c) => a + c.ot, 0);
+    const totalBooked = bookedMRR + bookedOT;
+    const remaining = remainingMRR != null ? remainingMRR : (targetHours - totalBooked);
+    const bookingPct = targetHours > 0 ? totalBooked / targetHours * 100 : 0;
+    return {
+      name: def.name,
+      customers: clients.length,
+      bookedMRR,
+      bookedOT,
+      totalBooked,
+      otProjects,
+      otHours,
+      targetHours,
+      remaining,
+      bookingPct,
+      remainingOT
+    };
   });
+
+  return {
+    consultants,
+    otProjects: consultants.reduce((a,c) => a + c.otProjects, 0),
+    otHours: consultants.reduce((a,c) => a + c.otHours, 0)
+  };
 }
 function renderConsultants(resources, clients){
-  const clientMap = new Map(clients.map(c => [c.name.toLowerCase(), c]));
   document.getElementById('consultantGrid').innerHTML = resources.map(r => {
-    const bookingColor = r.bookingPct >= 95 ? 'linear-gradient(90deg,#12dfab,#1dd1a1)' : r.bookingPct >= 70 ? 'linear-gradient(90deg,#ffb11a,#f59e0b)' : 'linear-gradient(90deg,#ff6b6b,#fb7185)';
-    const matched = clients.filter(c => {
-      const n = c.name.toLowerCase();
-      return n.includes(r.name.toLowerCase());
-    });
-    const liveHours = matched.reduce((a,c) => a + c.used, 0);
-    const liveProBono = matched.reduce((a,c) => a + c.proBonoHours, 0);
-    const overCount = matched.filter(c => c.proBonoHours > 0).length;
+    const bookingColor = r.remaining < 0 ? 'linear-gradient(90deg,#ff6b6b,#fb7185)' : r.remaining <= 10 ? 'linear-gradient(90deg,#ffb11a,#f59e0b)' : 'linear-gradient(90deg,#12dfab,#1dd1a1)';
     return `
       <div class="card consultant-card">
         <div class="consultant-head">
           <div class="avatar">${esc(initials(r.name))}</div>
           <div>
             <div class="consultant-name">${esc(r.name)}</div>
-            <div class="consultant-sub">${r.customers} kunder · mål: ${CAPACITY_TARGET}t</div>
+            <div class="consultant-sub">${r.customers} kunder</div>
           </div>
         </div>
         <div class="booking-row">
           <div class="label">Bookingprocent</div>
-          <div class="booking-value ${r.bookingPct > 100 ? 'bad' : r.bookingPct >= 75 ? 'warn' : 'good'}">${fmtPct(r.bookingPct)}%</div>
+          <div class="booking-value ${r.remaining < 0 ? 'bad' : r.remaining <= 10 ? 'warn' : 'good'}">${fmtPct(r.bookingPct)}%</div>
         </div>
         <div class="progress"><span style="width:${Math.min(100, Math.max(0, r.bookingPct))}%;background:${bookingColor}"></span></div>
-        <div class="progress-meta"><span>Mål: ${CAPACITY_TARGET}t kapacitet</span><span>${fmt1(r.bookedHours)}t booket</span></div>
+        <div class="progress-meta"><span>Mål: ${fmt1(r.targetHours)}t</span><span>${fmt1(r.totalBooked)}t booket</span></div>
         <div class="consultant-stats">
-          <div><div class="label">Rest kapacitet</div><div class="stat ${r.remaining < 0 ? 'bad' : 'good'}">${r.remaining >= 0 ? '+' : ''}${fmt1(r.remaining)}t</div></div>
-          <div><div class="label">Live registreret</div><div class="stat accent">${fmt1(liveHours)}t</div></div>
-          <div><div class="label">Kunder over budget</div><div class="stat ${overCount ? 'bad' : 'good'}">${overCount}</div></div>
-          <div><div class="label">Pro bono værdi</div><div class="stat ${liveProBono ? 'bad' : 'good'}">${liveProBono ? fmtDkk(liveProBono * HOURLY_RATE)+' kr.' : '0 kr.'}</div></div>
+          <div><div class="label">MRR timer</div><div class="stat">${fmt1(r.bookedMRR)}t</div></div>
+          <div><div class="label">OT timer</div><div class="stat ${r.bookedOT ? 'warn' : ''}">${fmt1(r.bookedOT)}t</div></div>
+          <div><div class="label">Rest rådighed</div><div class="stat ${r.remaining < 0 ? 'bad' : r.remaining <= 10 ? 'warn' : 'good'}">${r.remaining >= 0 ? '+' : ''}${fmt1(r.remaining)}t</div></div>
+          <div><div class="label">OT projekter</div><div class="stat">${r.otProjects}</div></div>
         </div>
       </div>`;
   }).join('');
@@ -297,7 +342,8 @@ async function render(){
   const [raw, resourceData] = await Promise.all([fetchGviz(SHEET_ID, SHEET_NAME), fetchResourceData()]);
   const parsed = parseHarvest(raw);
   const clients = buildClientAgg(parsed.records);
-  const resources = parseResourceSheet(resourceData);
+  const resourceSummary = parseResourceSheet(resourceData);
+  const resources = resourceSummary.consultants;
   const totalAgreed = sum(clients, 'agreed');
   const totalUsed = sum(clients, 'used');
   const totalProBonoHours = sum(clients, 'proBonoHours');
@@ -312,7 +358,7 @@ async function render(){
     { label:'Udfaktureringsgrad', value:`${fmtPct(invoicePct)}%`, sub:`${fmt1(totalUsed)}t af ${fmt1(totalAgreed)}t aftalt · ${parsed.currentMonth}`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1((previousUsed ? ((totalUsed-previousUsed)/previousUsed*100) : 0))}%` : 'Ingen forrige måned', cls: invoicePct > 100 ? 'bad' : invoicePct >= 75 ? 'warn' : 'good' },
     { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:`${clients.length} kunder med timer · ${parsed.currentMonth}`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1(deltaUsed)}t` : 'Ingen forrige måned', cls:'accent' },
     { label:'Pro bono (DKK)', value:`${fmtDkk(totalProBonoDkk)} kr.`, sub:`${fmt1(totalProBonoHours)}t over budget · alle kunder`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaProBono >= 0 ? '+' : ''}${fmtDkk(deltaProBono)} kr.` : 'Ingen forrige måned', cls: totalProBonoDkk ? 'bad' : 'good' },
-    { label:'Kunder over budget', value:String(overCount), sub:`af ${clients.filter(c => c.agreed > 0).length} kunder med budget`, delta: parsed.previousMonth ? `advarsel: ${clients.filter(c => c.proBonoHours===0 && c.progress >= 75 && c.agreed > 0).length} kunder` : '—', cls: overCount ? 'bad' : 'good' }
+    { label:'One time', value:`${resourceSummary.otProjects} projekter`, sub:`${fmt1(resourceSummary.otHours)} timer i måneden`, delta:'Samlet OT-overblik', cls: resourceSummary.otHours ? 'warn' : 'good' }
   ].map(card => `
     <div class="card">
       <div class="eyebrow">${card.label}</div>
