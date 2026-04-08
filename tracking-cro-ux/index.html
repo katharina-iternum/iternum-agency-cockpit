@@ -104,8 +104,18 @@ function renderBars(elId, items, valueKey, colorFn, formatFn){
 }
 async function load(){
   const data = await fetch('./data.json', { cache: 'no-store' }).then(r => r.json());
-  const currentRows = data.filter(r => String(r.month || '').toLowerCase().includes(currentMonthEnglish));
-  const previousRows = data.filter(r => String(r.month || '').toLowerCase().includes(previousMonthEnglish));
+  const isExternalClientProject = r => {
+    const project = String(r.project || '').toLowerCase();
+    const type = String(r.type || '').toLowerCase();
+    const client = String(r.client || '').toLowerCase();
+    if (type === 'internal') return false;
+    if (project.includes('itm -')) return false;
+    if (project.includes('fravær') || project.includes('fravaer')) return false;
+    if (client === 'intern') return false;
+    return true;
+  };
+  const currentRows = data.filter(r => String(r.month || '').toLowerCase().includes(currentMonthEnglish)).filter(isExternalClientProject);
+  const previousRows = data.filter(r => String(r.month || '').toLowerCase().includes(previousMonthEnglish)).filter(isExternalClientProject);
   const rows = currentRows.length ? currentRows : previousRows;
   const activeMonthLabel = currentRows.length ? currentMonthName : `${previousMonthName} (seneste i kilden)`;
   const previousCompare = previousRows.length ? previousRows : [];
@@ -114,7 +124,7 @@ async function load(){
     const agreed = num(r.agreedHours);
     const used = num(r.usedHours);
     const usedPct = agreed > 0 ? (used / agreed) * 100 : 0;
-    const overrunHours = Math.max(0, used - agreed);
+    const overrunHours = agreed > 0 ? Math.max(0, used - agreed) : 0;
     const overrunDkk = overrunHours * HOURLY_RATE;
     let status = { kind: 'green', text: 'OK' };
     if (overrunHours > 0) status = { kind: 'red', text: 'Over budget' };
