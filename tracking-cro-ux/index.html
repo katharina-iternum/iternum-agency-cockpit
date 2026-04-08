@@ -58,6 +58,7 @@
             <th>Type</th>
             <th>Aftalt (t)</th>
             <th>Brugt (t)</th>
+            <th>Fakturerbar (t)</th>
             <th>Ekstra pro bono (t)</th>
             <th>Ekstra pro bono (DKK)</th>
             <th>Brugt %</th>
@@ -137,16 +138,18 @@ async function load(){
 
   const projects = [...grouped.values()].map(r => {
     const usedPct = r.agreed > 0 ? (r.used / r.agreed) * 100 : 0;
+    const billableHours = r.agreed > 0 ? Math.min(r.used, r.agreed) : 0;
     const overrunHours = r.agreed > 0 ? Math.max(0, r.used - r.agreed) : 0;
     const overrunDkk = overrunHours * HOURLY_RATE;
     let status = { kind: 'green', text: 'OK' };
     if (overrunHours > 0) status = { kind: 'red', text: 'Over budget' };
     else if (r.agreed > 0 && usedPct >= 75) status = { kind: 'yellow', text: 'Tæt på' };
-    return { ...r, usedPct, overrunHours, overrunDkk, status };
+    return { ...r, usedPct, billableHours, overrunHours, overrunDkk, status };
   }).sort((a,b) => b.overrunHours - a.overrunHours || b.used - a.used);
 
   const prevUsed = previousCompare.reduce((a,r) => a + num(r.usedHours), 0);
   const totalUsed = projects.reduce((a,r) => a + r.used, 0);
+  const totalBillableHours = projects.reduce((a,r) => a + r.billableHours, 0);
   const totalOverrunHours = projects.reduce((a,r) => a + r.overrunHours, 0);
   const totalOverrunDkk = projects.reduce((a,r) => a + r.overrunDkk, 0);
   const overrunProjects = projects.filter(r => r.overrunHours > 0).length;
@@ -154,8 +157,8 @@ async function load(){
   document.getElementById('summaryCards').innerHTML = [
     { label:'Aktiv måned', value:activeMonthLabel, sub:`${projects.length} projekter for Lana`, delta: currentRows.length ? `sammenlignes mod ${previousMonthName}` : 'April mangler i kilden lige nu', cls:'accent' },
     { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:'Samlet brugt tid på Lana-projekter', delta: previousCompare.length ? `vs. ${previousMonthName} ${totalUsed - prevUsed >= 0 ? '+' : ''}${fmt1(totalUsed - prevUsed)}t` : 'Ingen forrige måned', cls:'accent' },
-    { label:'Ekstra pro bono', value:`${fmt1(totalOverrunHours)}t`, sub:`${overrunProjects} projekter over aftalt tid`, delta:`${fmtDkk(totalOverrunDkk)} kr.`, cls:totalOverrunHours ? 'bad' : 'good' },
-    { label:'Værste projekt', value:projects[0] ? fmt1(projects[0].overrunHours)+'t' : '0t', sub:projects[0] ? projects[0].project : 'Ingen overskridelser', delta:projects[0] ? fmtDkk(projects[0].overrunDkk)+' kr.' : '—', cls:projects[0]?.overrunHours ? 'bad' : 'good' }
+    { label:'Fakturerbar tid', value:`${fmt1(totalBillableHours)}t`, sub:'One time: maks. op til aftalte timer', delta:`${fmtDkk(totalBillableHours * HOURLY_RATE)} kr.`, cls:'good' },
+    { label:'Ekstra pro bono', value:`${fmt1(totalOverrunHours)}t`, sub:`${overrunProjects} projekter over aftalt tid`, delta:`${fmtDkk(totalOverrunDkk)} kr.`, cls:totalOverrunHours ? 'bad' : 'good' }
   ].map(card => `
     <div class="card">
       <div class="eyebrow">${esc(card.label)}</div>
@@ -175,6 +178,7 @@ async function load(){
         <td>${esc(p.type)}</td>
         <td class="num">${fmt1(p.agreed)}</td>
         <td class="num ${p.overrunHours > 0 ? 'bad' : ''}">${fmt1(p.used)}</td>
+        <td class="num good">${fmt1(p.billableHours)}</td>
         <td class="num ${p.overrunHours > 0 ? 'bad' : ''}">${p.overrunHours ? fmt1(p.overrunHours) : '—'}</td>
         <td class="num ${p.overrunDkk > 0 ? 'bad' : ''}">${p.overrunDkk ? fmtDkk(p.overrunDkk) : '—'}</td>
         <td class="num">${fmtPct(p.usedPct)}%</td>
