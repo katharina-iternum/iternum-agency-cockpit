@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking/CRO/UX · Lana Dashboard</title>
+  <style>
+    :root {
+      --bg:#070a11; --panel:#0f131d; --panel-2:#171d29; --panel-3:#202838; --text:#f4f7fb; --muted:#98a4c0; --accent:#5ea0ff; --green:#12dfab; --yellow:#ffb11a; --red:#ff6b6b; --border:rgba(255,255,255,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1660px;margin:0 auto;padding:28px}
+    .header{margin-bottom:22px}
+    h1{margin:0;font-size:32px}.sub{margin-top:8px;color:var(--muted);line-height:1.55}
+    .cards,.layout{display:grid;gap:18px}.cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:24px}.layout{grid-template-columns:1fr 1fr;margin-bottom:24px}
+    .card,.panel{background:rgba(12,15,24,.98);border:1px solid var(--border);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+    .card{padding:24px 22px}.panel{padding:22px}
+    .eyebrow,.section-title{color:#aeb7cb;font-size:12px;text-transform:uppercase;letter-spacing:.08em}.eyebrow{margin-bottom:18px}.section-title{margin:0 0 14px}
+    .metric{font-size:44px;font-weight:800;letter-spacing:-.03em;margin:0 0 8px}.muted{color:var(--muted)}.good{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}.accent{color:var(--accent)}
+    .divider{height:1px;background:var(--border);margin:18px 0 14px}.delta{font-size:15px;font-weight:700}
+    .bars{display:flex;flex-direction:column;gap:12px}.bar-row{display:grid;grid-template-columns:240px 1fr 100px;gap:12px;align-items:center}.bar-label{color:#dbe4ff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-track{height:12px;background:var(--panel-3);border-radius:999px;overflow:hidden}.bar-fill{height:100%;border-radius:999px}.bar-value{color:var(--muted);text-align:right}
+    .table-wrap{overflow:auto} table{width:100%;border-collapse:collapse;min-width:1200px} th,td{text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);font-size:14px} th{color:var(--muted);background:rgba(8,12,18,.55);position:sticky;top:0;text-transform:uppercase;letter-spacing:.04em} tr:last-child td{border-bottom:none}
+    td.num{text-align:right;font-variant-numeric:tabular-nums}.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;font-weight:700;font-size:12px;white-space:nowrap}.pill.green{background:rgba(18,223,171,.14);color:var(--green)}.pill.yellow{background:rgba(255,177,26,.16);color:var(--yellow)}.pill.red{background:rgba(255,107,107,.14);color:var(--red)}
+    @media (max-width:1200px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.bar-row{grid-template-columns:180px 1fr 80px}}
+    @media (max-width:760px){.wrap{padding:18px}.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="eyebrow">Afdelingsdashboard</div>
+    <h1>Tracking / CRO / UX · Lana Dashboard</h1>
+    <div class="sub">Separat overblik over projekter hvor Lana Hamawander står som ansvarlig i datakilden, med fokus på overskridelser og pro bono.</div>
+  </div>
+
+  <div class="cards" id="summaryCards"></div>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="section-title">Størst pro bono</div>
+      <div class="bars" id="overrunBars"></div>
+    </div>
+    <div class="panel">
+      <div class="section-title">Mest tidsforbrug</div>
+      <div class="bars" id="usageBars"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">Projektoversigt</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Projekt</th>
+            <th>Kunde</th>
+            <th>Type</th>
+            <th>Aftalt (t)</th>
+            <th>Brugt (t)</th>
+            <th>Ekstra pro bono (t)</th>
+            <th>Ekstra pro bono (DKK)</th>
+            <th>Brugt %</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="projectTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+const HOURLY_RATE = 1145;
+const MONTH_NAMES = ['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+const MONTH_NAMES_EN = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+const now = new Date();
+const currentMonthName = MONTH_NAMES[now.getMonth()];
+const previousMonthName = MONTH_NAMES[(now.getMonth() + 11) % 12];
+const currentMonthEnglish = MONTH_NAMES_EN[now.getMonth()];
+const previousMonthEnglish = MONTH_NAMES_EN[(now.getMonth() + 11) % 12];
+const fmt1 = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
+const fmtPct = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
+const fmtDkk = n => new Intl.NumberFormat('da-DK',{maximumFractionDigits:0}).format(Math.round(Number(n||0)));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => {
+  if (v == null || v === '') return 0;
+  if (typeof v === 'number') return v;
+  const s = String(v).trim();
+  if (!s) return 0;
+  if (s.includes(',') && s.includes('.')) return Number(s.replace(/\./g,'').replace(',','.')) || 0;
+  if (s.includes(',')) return Number(s.replace(',','.')) || 0;
+  return Number(s) || 0;
+};
+function statusPill(kind, text){ return `<span class="pill ${kind}">${text}</span>`; }
+function renderBars(elId, items, valueKey, colorFn, formatFn){
+  const el = document.getElementById(elId);
+  const max = Math.max(...items.map(x => Math.abs(x[valueKey]) || 0), 1);
+  el.innerHTML = items.map(item => `
+    <div class="bar-row">
+      <div class="bar-label">${esc(item.name)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(6, Math.round(Math.abs(item[valueKey]) / max * 100))}%;background:${colorFn(item)}"></div></div>
+      <div class="bar-value">${formatFn(item[valueKey])}</div>
+    </div>`).join('');
+}
+async function load(){
+  const data = await fetch('./data.json', { cache: 'no-store' }).then(r => r.json());
+  const currentRows = data.filter(r => String(r.month || '').toLowerCase().includes(currentMonthEnglish));
+  const previousRows = data.filter(r => String(r.month || '').toLowerCase().includes(previousMonthEnglish));
+  const rows = currentRows.length ? currentRows : previousRows;
+  const activeMonthLabel = currentRows.length ? currentMonthName : `${previousMonthName} (seneste i kilden)`;
+  const previousCompare = previousRows.length ? previousRows : [];
+
+  const projects = rows.map(r => {
+    const agreed = num(r.agreedHours);
+    const used = num(r.usedHours);
+    const usedPct = agreed > 0 ? (used / agreed) * 100 : 0;
+    const overrunHours = Math.max(0, used - agreed);
+    const overrunDkk = overrunHours * HOURLY_RATE;
+    let status = { kind: 'green', text: 'OK' };
+    if (overrunHours > 0) status = { kind: 'red', text: 'Over budget' };
+    else if (agreed > 0 && usedPct >= 75) status = { kind: 'yellow', text: 'Tæt på' };
+    return { ...r, agreed, used, usedPct, overrunHours, overrunDkk, status };
+  }).sort((a,b) => b.overrunHours - a.overrunHours || b.used - a.used);
+
+  const prevUsed = previousCompare.reduce((a,r) => a + num(r.usedHours), 0);
+  const totalUsed = projects.reduce((a,r) => a + r.used, 0);
+  const totalOverrunHours = projects.reduce((a,r) => a + r.overrunHours, 0);
+  const totalOverrunDkk = projects.reduce((a,r) => a + r.overrunDkk, 0);
+  const overrunProjects = projects.filter(r => r.overrunHours > 0).length;
+
+  document.getElementById('summaryCards').innerHTML = [
+    { label:'Aktiv måned', value:activeMonthLabel, sub:`${projects.length} projekter for Lana`, delta: currentRows.length ? `sammenlignes mod ${previousMonthName}` : 'April mangler i kilden lige nu', cls:'accent' },
+    { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:'Samlet brugt tid på Lana-projekter', delta: previousCompare.length ? `vs. ${previousMonthName} ${totalUsed - prevUsed >= 0 ? '+' : ''}${fmt1(totalUsed - prevUsed)}t` : 'Ingen forrige måned', cls:'accent' },
+    { label:'Ekstra pro bono', value:`${fmt1(totalOverrunHours)}t`, sub:`${overrunProjects} projekter over aftalt tid`, delta:`${fmtDkk(totalOverrunDkk)} kr.`, cls:totalOverrunHours ? 'bad' : 'good' },
+    { label:'Værste projekt', value:projects[0] ? fmt1(projects[0].overrunHours)+'t' : '0t', sub:projects[0] ? projects[0].project : 'Ingen overskridelser', delta:projects[0] ? fmtDkk(projects[0].overrunDkk)+' kr.' : '—', cls:projects[0]?.overrunHours ? 'bad' : 'good' }
+  ].map(card => `
+    <div class="card">
+      <div class="eyebrow">${esc(card.label)}</div>
+      <div class="metric ${card.cls}">${esc(card.value)}</div>
+      <div class="muted">${esc(card.sub)}</div>
+      <div class="divider"></div>
+      <div class="delta ${String(card.delta).includes('+') ? 'good' : String(card.delta).includes('-') ? 'bad' : 'muted'}">${esc(card.delta)}</div>
+    </div>`).join('');
+
+    renderBars('overrunBars', projects.filter(p => p.overrunHours > 0).slice(0,8).map(p => ({ name: p.project, value: p.overrunHours })), 'value', _ => 'linear-gradient(90deg,#ff6b6b,#fb7185)', v => `${fmt1(v)} t`);
+    renderBars('usageBars', [...projects].sort((a,b) => b.used - a.used).slice(0,8).map(p => ({ name: p.project, value: p.used })), 'value', _ => 'linear-gradient(90deg,#12dfab,#1dd1a1)', v => `${fmt1(v)} t`);
+
+    document.getElementById('projectTable').innerHTML = projects.map(p => `
+      <tr>
+        <td>${esc(p.project)}</td>
+        <td>${esc(p.client)}</td>
+        <td>${esc(p.type)}</td>
+        <td class="num">${fmt1(p.agreed)}</td>
+        <td class="num ${p.overrunHours > 0 ? 'bad' : ''}">${fmt1(p.used)}</td>
+        <td class="num ${p.overrunHours > 0 ? 'bad' : ''}">${p.overrunHours ? fmt1(p.overrunHours) : '—'}</td>
+        <td class="num ${p.overrunDkk > 0 ? 'bad' : ''}">${p.overrunDkk ? fmtDkk(p.overrunDkk) : '—'}</td>
+        <td class="num">${fmtPct(p.usedPct)}%</td>
+        <td>${statusPill(p.status.kind, p.status.text)}</td>
+      </tr>`).join('');
+}
+load().catch(err => {
+  document.getElementById('summaryCards').innerHTML = `<div class="card"><div class="eyebrow">Load error</div><div class="metric bad">Fejl</div><div class="muted">${esc(err.message || String(err))}</div></div>`;
+});
+</script>
+</body>
+</html>
