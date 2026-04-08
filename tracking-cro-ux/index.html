@@ -122,7 +122,7 @@ async function load(){
 
   const grouped = new Map();
   for (const r of rows) {
-    const key = String(r.projectId || r.project);
+    const key = String(r.project || '').trim().toLowerCase();
     const agreed = num(r.agreedHours);
     const used = num(r.usedHours);
     const existing = grouped.get(key) || {
