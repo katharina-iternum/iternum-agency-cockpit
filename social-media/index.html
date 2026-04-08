@@ -133,6 +133,10 @@ const SHEET_ID = '18zsYYyOQAaZJjFMNtkO4jcdgMS6xwxwi-Z7ml9F-skM';
 const SHEET_NAME = 'Social Media tid 2026';
 const HOURLY_RATE = 1145;
 const CAPACITY_TARGET = 114;
+const MONTH_NAMES = ['januar','februar','marts','april','maj','juni','juli','august','september','oktober','november','december'];
+const now = new Date();
+const currentMonthName = MONTH_NAMES[now.getMonth()];
+const previousMonthName = MONTH_NAMES[(now.getMonth() + 11) % 12];
 const RESOURCE_SHEET_IDS = {
   'Google Ads': '1dzMMRKg0oGOgW_eZgfbb2ieryQRHFGykSCt0zEOtoaU',
   'SEO': '1qfnnsgyMzFuXSAFiUwaV1vo0AtiW188ykl8K00SDPcY',
@@ -200,22 +204,24 @@ async function fetchResourceData(){
   return fetchGviz(RESOURCE_SHEET_IDS[DEPARTMENT], 'Kundefordeling');
 }
 function parseHarvest(raw){
-  const monthIndices = raw.cols.map((c, i) => MONTH_RE.test(c) ? i : -1).filter(i => i >= 0);
-  const currentIdx = monthIndices[0] ?? 3;
-  const previousIdx = monthIndices[1] ?? -1;
-  const currentMonth = raw.cols[currentIdx] || 'Aktuel måned';
-  const previousMonth = previousIdx >= 0 ? raw.cols[previousIdx] : null;
+  const currentIdx = raw.cols.findIndex(c => String(c || '').trim().toLowerCase().includes(currentMonthName));
+  const previousIdx = raw.cols.findIndex(c => String(c || '').trim().toLowerCase().includes(previousMonthName));
+  const fallbackMonthIndices = raw.cols.map((c, i) => MONTH_RE.test(c) ? i : -1).filter(i => i >= 0);
+  const safeCurrentIdx = currentIdx >= 0 ? currentIdx : (fallbackMonthIndices[0] ?? 3);
+  const safePreviousIdx = previousIdx >= 0 ? previousIdx : (fallbackMonthIndices[1] ?? -1);
+  const currentMonth = currentIdx >= 0 ? raw.cols[safeCurrentIdx] : `${currentMonthName} (mangler i kilden)`;
+  const previousMonth = safePreviousIdx >= 0 ? raw.cols[safePreviousIdx] : previousMonthName;
   const agreedIdx = 1;
   const records = raw.rows
     .filter(r => r[0] && typeof r[0] !== 'number')
     .map(r => ({
       client: String(r[0]).trim(),
       agreed: num(r[agreedIdx]),
-      used: num(r[currentIdx]),
-      previousUsed: previousIdx >= 0 ? num(r[previousIdx]) : 0
+      used: currentIdx >= 0 ? num(r[safeCurrentIdx]) : 0,
+      previousUsed: safePreviousIdx >= 0 ? num(r[safePreviousIdx]) : 0
     }))
     .filter(r => r.client && (r.agreed || r.used || r.previousUsed));
-  return { currentMonth, previousMonth, records };
+  return { currentMonth, previousMonth, records, hasCurrentMonth: currentIdx >= 0 };
 }
 function buildClientAgg(records){
   return Object.entries(groupBy(records, r => r.client)).map(([name, rs]) => {
@@ -354,9 +360,10 @@ async function render(){
   const deltaUsed = totalUsed - previousUsed;
   const previousProBonoDkk = clients.reduce((a,c) => a + Math.max(0, c.previousUsed - c.agreed) * HOURLY_RATE, 0);
   const deltaProBono = totalProBonoDkk - previousProBonoDkk;
+  const monthNote = parsed.hasCurrentMonth ? parsed.currentMonth : `${currentMonthName} mangler i kilden — viser 0 live-timer for nu`;
   document.getElementById('summaryCards').innerHTML = [
-    { label:'Udfaktureringsgrad', value:`${fmtPct(invoicePct)}%`, sub:`${fmt1(totalUsed)}t af ${fmt1(totalAgreed)}t aftalt · ${parsed.currentMonth}`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1((previousUsed ? ((totalUsed-previousUsed)/previousUsed*100) : 0))}%` : 'Ingen forrige måned', cls: invoicePct > 100 ? 'bad' : invoicePct >= 75 ? 'warn' : 'good' },
-    { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:`${clients.length} kunder med timer · ${parsed.currentMonth}`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1(deltaUsed)}t` : 'Ingen forrige måned', cls:'accent' },
+    { label:'Udfaktureringsgrad', value:`${fmtPct(invoicePct)}%`, sub:`${fmt1(totalUsed)}t af ${fmt1(totalAgreed)}t aftalt · ${monthNote}`, delta: parsed.previousMonth ? `vs. ${String(parsed.previousMonth).toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1((previousUsed ? ((totalUsed-previousUsed)/previousUsed*100) : 0))}%` : 'Ingen forrige måned', cls: invoicePct > 100 ? 'bad' : invoicePct >= 75 ? 'warn' : 'good' },
+    { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:`${clients.length} kunder med timer · ${monthNote}`, delta: parsed.previousMonth ? `vs. ${String(parsed.previousMonth).toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1(deltaUsed)}t` : 'Ingen forrige måned', cls:'accent' },
     { label:'Pro bono (DKK)', value:`${fmtDkk(totalProBonoDkk)} kr.`, sub:`${fmt1(totalProBonoHours)}t over budget · alle kunder`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaProBono >= 0 ? '+' : ''}${fmtDkk(deltaProBono)} kr.` : 'Ingen forrige måned', cls: totalProBonoDkk ? 'bad' : 'good' },
     { label:'One time', value:`${resourceSummary.otProjects} projekter`, sub:`${fmt1(resourceSummary.otHours)} timer i måneden`, delta:'Samlet OT-overblik', cls: resourceSummary.otHours ? 'warn' : 'good' }
   ].map(card => `
