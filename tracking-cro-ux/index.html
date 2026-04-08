@@ -130,7 +130,7 @@ async function load(){
       agreed: 0,
       used: 0
     };
-    existing.agreed += agreed;
+    existing.agreed = Math.max(existing.agreed, agreed);
     existing.used += used;
     grouped.set(key, existing);
   }
