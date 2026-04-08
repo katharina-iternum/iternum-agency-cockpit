@@ -7,45 +7,57 @@
   <style>
     :root {
       --bg: #0b1020;
-      --panel: #121826;
-      --panel-2: #0f1723;
-      --panel-3: #1a2335;
+      --panel: #0f131d;
+      --panel-2: #171d29;
+      --panel-3: #202838;
       --text: #f4f7fb;
       --muted: #98a4c0;
-      --accent: #6f7cff;
-      --green: #10d19b;
-      --yellow: #f59e0b;
-      --red: #ff5f6d;
+      --accent: #5ea0ff;
+      --green: #12dfab;
+      --yellow: #ffb11a;
+      --red: #ff6b6b;
       --border: rgba(255,255,255,.08);
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1020 0%,#0d1327 100%);color:var(--text)}
-    .wrap{max-width:1580px;margin:0 auto;padding:28px}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#070a11;color:var(--text)}
+    .wrap{max-width:1660px;margin:0 auto;padding:28px}
     .header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}
     h1{margin:0;font-size:32px}
-    .sub{margin-top:8px;color:var(--muted);line-height:1.5;max-width:78ch}
-    .panel,.card{background:rgba(18,24,38,.94);border:1px solid var(--border);border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.24)}
-    .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-bottom:18px}
-    .panel{padding:20px}
-    .eyebrow{color:#aab6d3;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-    .hero-stat{font-size:44px;font-weight:800;letter-spacing:-.03em;margin:8px 0}
+    .sub{margin-top:8px;color:var(--muted);line-height:1.55;max-width:82ch}
+    .cards,.consultant-grid,.layout{display:grid;gap:18px}
+    .cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:24px}
+    .consultant-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:24px}
+    .layout{grid-template-columns:1fr 1fr;margin-bottom:24px}
+    .panel,.card{background:rgba(12,15,24,.98);border:1px solid var(--border);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+    .card{padding:26px 22px}
+    .panel{padding:22px}
+    .eyebrow,.section-title{color:#aeb7cb;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    .eyebrow{margin-bottom:24px}
+    .section-title{margin:0 0 14px}
+    .metric{font-size:46px;font-weight:800;letter-spacing:-.03em;margin:0 0 8px}
+    .metric.small{font-size:28px}
     .muted{color:var(--muted)}
-    .mini-grid,.cards{display:grid;gap:14px}
-    .mini-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px}
-    .mini-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:14px}
-    .cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
-    .card{padding:18px}
-    .label{color:var(--muted);font-size:13px}
-    .metric{font-size:34px;font-weight:800;margin-top:8px}
-    .good{color:var(--green)} .warn{color:var(--yellow)} .bad{color:var(--red)}
-    .layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
-    .section-title{margin:0 0 14px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+    .accent{color:var(--accent)} .good{color:var(--green)} .warn{color:var(--yellow)} .bad{color:var(--red)}
+    .divider{height:1px;background:var(--border);margin:18px 0 14px}
+    .delta{font-size:15px;font-weight:700}
     .bars{display:flex;flex-direction:column;gap:12px}
-    .bar-row{display:grid;grid-template-columns:220px 1fr 90px;gap:12px;align-items:center}
+    .bar-row{display:grid;grid-template-columns:220px 1fr 92px;gap:12px;align-items:center}
     .bar-label{color:#dbe4ff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .bar-track{height:12px;background:var(--panel-3);border-radius:999px;overflow:hidden}
-    .bar-fill{height:100%;border-radius:999px}
+    .bar-track{height:12px;background:var(--panel-3);border-radius:999px;overflow:hidden}.bar-fill{height:100%;border-radius:999px}
     .bar-value{color:var(--muted);text-align:right}
+    .consultant-card{padding:20px 22px}
+    .consultant-head{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+    .avatar{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(18,223,171,.12);color:var(--green);font-size:22px;font-weight:800}
+    .consultant-name{font-size:18px;font-weight:800;margin-bottom:4px}
+    .consultant-sub{color:var(--muted)}
+    .booking-row{display:flex;justify-content:space-between;align-items:center;margin:8px 0 10px}
+    .booking-value{font-size:18px;font-weight:800}
+    .progress{height:14px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .progress > span{display:block;height:100%;border-radius:999px}
+    .progress-meta{display:flex;justify-content:space-between;gap:12px;margin-top:8px;color:var(--muted);font-size:13px}
+    .consultant-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-top:14px;margin-top:14px;border-top:1px solid var(--border)}
+    .label{color:var(--muted);font-size:13px}
+    .stat{font-size:18px;font-weight:800;margin-top:4px}
     .table-wrap{overflow:auto}
     table{width:100%;border-collapse:collapse;min-width:1100px}
     th,td{text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);font-size:14px}
@@ -54,16 +66,14 @@
     td.num{text-align:right;font-variant-numeric:tabular-nums}
     .client{font-size:18px;font-weight:700}
     .projects{color:var(--muted);font-size:12px;margin-left:6px}
-    .progress{height:12px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;min-width:180px}
-    .progress > span{display:block;height:100%;border-radius:999px}
     .pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;font-weight:700;font-size:12px;white-space:nowrap}
-    .pill.green{background:rgba(16,209,155,.14);color:var(--green)}
-    .pill.yellow{background:rgba(245,158,11,.16);color:var(--yellow)}
-    .pill.red{background:rgba(255,95,109,.14);color:var(--red)}
+    .pill.green{background:rgba(18,223,171,.14);color:var(--green)}
+    .pill.yellow{background:rgba(255,177,26,.16);color:var(--yellow)}
+    .pill.red{background:rgba(255,107,107,.14);color:var(--red)}
     .mono{font-variant-numeric:tabular-nums}
-    .note{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}
-    @media (max-width:1200px){.hero,.layout,.cards{grid-template-columns:1fr 1fr}.mini-grid{grid-template-columns:1fr}.bar-row{grid-template-columns:160px 1fr 70px}}
-    @media (max-width:860px){.hero,.layout,.cards{grid-template-columns:1fr}.wrap{padding:18px}.header{flex-direction:column}}
+    .empty{color:var(--muted)}
+    @media (max-width:1320px){.cards,.consultant-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.bar-row{grid-template-columns:160px 1fr 70px}}
+    @media (max-width:760px){.wrap{padding:18px}.cards,.consultant-grid{grid-template-columns:1fr}.header{flex-direction:column}}
   </style>
 </head>
 <body>
@@ -72,29 +82,17 @@
     <div>
       <div class="eyebrow">Afdelingsdashboard</div>
       <h1>SEO · Kundetidsoverblik</h1>
-      <div class="sub">Viser hvilke kunder der bruger for meget tid i SEO. Pro bono beregnes som overforbrugte timer × 1.145 DKK/time. Dashboardet er kun bygget på SEO-kilden og linker ikke videre til andre afdelinger.</div>
+      <div class="sub">Viser hvilke kunder der bruger for meget tid i SEO, plus et konsulentoverblik i samme stil som ressourcestyringen. Pro bono beregnes som overforbrugte timer × 1.145 DKK/time. Dashboardet linker ikke videre til andre afdelinger.</div>
     </div>
   </div>
 
-  <div class="hero">
-    <div class="panel">
-      <div class="eyebrow">Månedsoverblik</div>
-      <div class="hero-stat" id="heroStat">Loader…</div>
-      <div class="muted" id="heroCopy">Henter live data fra afdelingens Google Sheet.</div>
-      <div class="mini-grid">
-        <div class="mini-card"><div class="label">Måned</div><div id="heroMonth">—</div></div>
-        <div class="mini-card"><div class="label">Timepris</div><div>1.145 DKK</div></div>
-        <div class="mini-card"><div class="label">Datakilde</div><div>SEO afdeling</div></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="section-title">Ledelsesfokus</div>
-      <div class="bars" id="focusBars"></div>
-      <div class="note">Fremhæver de kunder med størst tidsforbrug og størst pro bono-risiko i denne afdeling.</div>
-    </div>
-  </div>
+  <div class="cards" id="summaryCards"></div>
 
-  <div class="cards" id="cards"></div>
+  <div class="panel" style="margin-bottom:24px;">
+    <div class="section-title">Konsulentressourcer</div>
+    <div class="muted" style="margin-bottom:18px">Bookingprocent og bookede timer fra ressourcearket · kundeforbrug og pro bono fra live Harvest-data</div>
+    <div class="consultant-grid" id="consultantGrid"></div>
+  </div>
 
   <div class="layout">
     <div class="panel">
@@ -117,7 +115,7 @@
             <th>Aftalt (t)</th>
             <th>Brugt (t)</th>
             <th>Rest (t)</th>
-            <th>Fremgang</th>
+            <th>Forbrug</th>
             <th>Vs. sidste måned</th>
             <th>Pro bono (t)</th>
             <th>Pro bono (DKK)</th>
@@ -134,12 +132,14 @@ const DEPARTMENT = 'SEO';
 const SHEET_ID = '1zOuU1JKN6OYQmlEULIKr7xUgBlz6Yl8TCV_SBpLzj-4';
 const SHEET_NAME = 'SEO 2026 tid';
 const HOURLY_RATE = 1145;
+const CAPACITY_TARGET = 114;
 const MONTH_RE = /januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december/i;
 const fmt1 = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
 const fmtPct = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
 const fmtDkk = n => new Intl.NumberFormat('da-DK',{maximumFractionDigits:0}).format(Math.round(Number(n||0)));
 const num = v => { if(v==null||v==='') return 0; if(typeof v==='number') return v; return Number(String(v).replace(/\./g,'').replace(',','.')) || 0; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials = name => name.split(/\s+/).filter(Boolean).slice(0,2).map(x => x[0]).join('').toUpperCase();
 function statusPill(kind, text){ return `<span class="pill ${kind}">${text}</span>`; }
 function sum(arr,key){ return arr.reduce((a,x)=>a + (+x[key] || 0), 0); }
 function groupBy(arr,keyFn){ return arr.reduce((acc,item)=>((acc[keyFn(item)] ??= []).push(item), acc), {}); }
@@ -183,6 +183,11 @@ async function fetchGviz(id, sheet){
     document.head.appendChild(script);
   });
 }
+async function fetchResourceData(){
+  const res = await fetch('./resource-data.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Kunne ikke hente resource-data.json');
+  return res.json();
+}
 function parseHarvest(raw){
   const monthIndices = raw.cols.map((c, i) => MONTH_RE.test(c) ? i : -1).filter(i => i >= 0);
   const currentIdx = monthIndices[0] ?? 3;
@@ -196,8 +201,7 @@ function parseHarvest(raw){
       client: String(r[0]).trim(),
       agreed: num(r[agreedIdx]),
       used: num(r[currentIdx]),
-      previousUsed: previousIdx >= 0 ? num(r[previousIdx]) : 0,
-      notes: String(r[2] || '').trim()
+      previousUsed: previousIdx >= 0 ? num(r[previousIdx]) : 0
     }))
     .filter(r => r.client && (r.agreed || r.used || r.previousUsed));
   return { currentMonth, previousMonth, records };
@@ -219,36 +223,110 @@ function buildClientAgg(records){
     return { name, agreed, used, previousUsed, remaining, progress, proBonoHours, proBonoDkk, deltaPrev, projects: rs.length, status };
   }).sort((a,b) => (b.proBonoHours - a.proBonoHours) || (b.used - a.used));
 }
+function parseResourceSheet(data){
+  const rows = data.values || [];
+  const defs = {
+    'Google Ads': [
+      { name: 'Claes', customerCol: 5, hourCol: 6 },
+      { name: 'Rasmus', customerCol: 13, hourCol: 14 },
+      { name: 'Hanne', customerCol: 24, hourCol: 25 },
+      { name: 'Giovanni', customerCol: 36, hourCol: 38 }
+    ],
+    'SEO': [
+      { name: 'Anton', customerCol: 5, hourCol: 6 },
+      { name: 'Andreas', customerCol: 11, hourCol: 12 }
+    ],
+    'Social Media': [
+      { name: 'Daniel', customerCol: 5, hourCol: 6 },
+      { name: 'Jacob', customerCol: 10, hourCol: 11 },
+      { name: 'Nana', customerCol: 18, hourCol: 19 },
+      { name: 'Katharina', customerCol: 24, hourCol: 25 }
+    ]
+  };
+  return (defs[DEPARTMENT] || []).map(def => {
+    const clients = [];
+    for (const row of rows) {
+      const client = String(row?.[def.customerCol] || '').trim();
+      const hours = num(row?.[def.hourCol]);
+      if (!client || /^kunder$/i.test(client) || /^rating/i.test(client) || /^mål for/i.test(client) || /^bookning/i.test(client) || /^total/i.test(client)) continue;
+      if (!hours && !/[a-zæøå]/i.test(client)) continue;
+      if (client.length < 2) continue;
+      clients.push({ client, hours });
+    }
+    const bookedHours = clients.reduce((a,c) => a + c.hours, 0);
+    const bookingPct = CAPACITY_TARGET > 0 ? bookedHours / CAPACITY_TARGET * 100 : 0;
+    return { name: def.name, customers: clients.length, bookedHours, bookingPct, remaining: CAPACITY_TARGET - bookedHours };
+  });
+}
+function renderConsultants(resources, clients){
+  const clientMap = new Map(clients.map(c => [c.name.toLowerCase(), c]));
+  document.getElementById('consultantGrid').innerHTML = resources.map(r => {
+    const bookingColor = r.bookingPct >= 95 ? 'linear-gradient(90deg,#12dfab,#1dd1a1)' : r.bookingPct >= 70 ? 'linear-gradient(90deg,#ffb11a,#f59e0b)' : 'linear-gradient(90deg,#ff6b6b,#fb7185)';
+    const matched = clients.filter(c => {
+      const n = c.name.toLowerCase();
+      return n.includes(r.name.toLowerCase());
+    });
+    const liveHours = matched.reduce((a,c) => a + c.used, 0);
+    const liveProBono = matched.reduce((a,c) => a + c.proBonoHours, 0);
+    const overCount = matched.filter(c => c.proBonoHours > 0).length;
+    return `
+      <div class="card consultant-card">
+        <div class="consultant-head">
+          <div class="avatar">${esc(initials(r.name))}</div>
+          <div>
+            <div class="consultant-name">${esc(r.name)}</div>
+            <div class="consultant-sub">${r.customers} kunder · mål: ${CAPACITY_TARGET}t</div>
+          </div>
+        </div>
+        <div class="booking-row">
+          <div class="label">Bookingprocent</div>
+          <div class="booking-value ${r.bookingPct > 100 ? 'bad' : r.bookingPct >= 75 ? 'warn' : 'good'}">${fmtPct(r.bookingPct)}%</div>
+        </div>
+        <div class="progress"><span style="width:${Math.min(100, Math.max(0, r.bookingPct))}%;background:${bookingColor}"></span></div>
+        <div class="progress-meta"><span>Mål: ${CAPACITY_TARGET}t kapacitet</span><span>${fmt1(r.bookedHours)}t booket</span></div>
+        <div class="consultant-stats">
+          <div><div class="label">Rest kapacitet</div><div class="stat ${r.remaining < 0 ? 'bad' : 'good'}">${r.remaining >= 0 ? '+' : ''}${fmt1(r.remaining)}t</div></div>
+          <div><div class="label">Live registreret</div><div class="stat accent">${fmt1(liveHours)}t</div></div>
+          <div><div class="label">Kunder over budget</div><div class="stat ${overCount ? 'bad' : 'good'}">${overCount}</div></div>
+          <div><div class="label">Pro bono værdi</div><div class="stat ${liveProBono ? 'bad' : 'good'}">${liveProBono ? fmtDkk(liveProBono * HOURLY_RATE)+' kr.' : '0 kr.'}</div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
 async function render(){
-  const raw = await fetchGviz(SHEET_ID, SHEET_NAME);
+  const [raw, resourceData] = await Promise.all([fetchGviz(SHEET_ID, SHEET_NAME), fetchResourceData()]);
   const parsed = parseHarvest(raw);
   const clients = buildClientAgg(parsed.records);
+  const resources = parseResourceSheet(resourceData);
   const totalAgreed = sum(clients, 'agreed');
   const totalUsed = sum(clients, 'used');
   const totalProBonoHours = sum(clients, 'proBonoHours');
   const totalProBonoDkk = sum(clients, 'proBonoDkk');
   const overCount = clients.filter(c => c.proBonoHours > 0).length;
-  const warningCount = clients.filter(c => c.proBonoHours === 0 && c.progress >= 75 && c.agreed > 0).length;
-  const util = totalAgreed > 0 ? totalUsed / totalAgreed * 100 : 0;
-
-  document.getElementById('heroStat').textContent = `${fmt1(totalUsed)} timer brugt`;
-  document.getElementById('heroMonth').textContent = parsed.currentMonth;
-  document.getElementById('heroCopy').textContent = `${overCount} kunder er over budget i ${DEPARTMENT}. Samlet pro bono lige nu: ${fmt1(totalProBonoHours)} timer / ${fmtDkk(totalProBonoDkk)} DKK.`;
-
-  document.getElementById('cards').innerHTML = [
-    ['Kunder over budget', overCount, 'Kræver handling nu', overCount ? 'bad' : 'good'],
-    ['Advarsel 75–99%', warningCount, 'Tæt på budgetloft', warningCount ? 'warn' : 'good'],
-    ['Pro bono timer', `${fmt1(totalProBonoHours)} t`, 'Overforbrugte timer × 1.145 DKK', totalProBonoHours ? 'bad' : 'good'],
-    ['Pro bono værdi', `${fmtDkk(totalProBonoDkk)} DKK`, `Udnyttelse: ${fmtPct(util)}%`, totalProBonoDkk ? 'bad' : 'good']
-  ].map(([label, value, note, cls]) => `<div class="card"><div class="label">${label}</div><div class="metric ${cls}">${value}</div><div class="muted">${note}</div></div>`).join('');
-
-  renderBars('focusBars', clients.slice(0,5).map(c => ({ name: c.name, value: c.proBonoHours > 0 ? c.proBonoHours : c.used })), 'value', i => i.value > 0 ? 'linear-gradient(90deg,#ff5f6d,#fb7185)' : 'linear-gradient(90deg,#10d19b,#34d399)', v => `${fmt1(v)} t`);
-  renderBars('usageBars', [...clients].sort((a,b) => b.used - a.used).slice(0,8).map(c => ({ name: c.name, used: c.used })), 'used', _ => 'linear-gradient(90deg,#10d19b,#34d399)', v => `${fmt1(v)} t`);
-  renderBars('proBonoBars', [...clients].sort((a,b) => b.proBonoHours - a.proBonoHours).slice(0,8).map(c => ({ name: c.name, proBonoHours: c.proBonoHours })), 'proBonoHours', i => i.proBonoHours > 0 ? 'linear-gradient(90deg,#ff5f6d,#fb7185)' : 'linear-gradient(90deg,#334155,#475569)', v => `${fmt1(v)} t`);
-
+  const invoicePct = totalAgreed > 0 ? totalUsed / totalAgreed * 100 : 0;
+  const previousUsed = sum(clients, 'previousUsed');
+  const deltaUsed = totalUsed - previousUsed;
+  const previousProBonoDkk = clients.reduce((a,c) => a + Math.max(0, c.previousUsed - c.agreed) * HOURLY_RATE, 0);
+  const deltaProBono = totalProBonoDkk - previousProBonoDkk;
+  document.getElementById('summaryCards').innerHTML = [
+    { label:'Udfaktureringsgrad', value:`${fmtPct(invoicePct)}%`, sub:`${fmt1(totalUsed)}t af ${fmt1(totalAgreed)}t aftalt · ${parsed.currentMonth}`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1((previousUsed ? ((totalUsed-previousUsed)/previousUsed*100) : 0))}%` : 'Ingen forrige måned', cls: invoicePct > 100 ? 'bad' : invoicePct >= 75 ? 'warn' : 'good' },
+    { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:`${clients.length} kunder med timer · ${parsed.currentMonth}`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaUsed >= 0 ? '+' : ''}${fmt1(deltaUsed)}t` : 'Ingen forrige måned', cls:'accent' },
+    { label:'Pro bono (DKK)', value:`${fmtDkk(totalProBonoDkk)} kr.`, sub:`${fmt1(totalProBonoHours)}t over budget · alle kunder`, delta: parsed.previousMonth ? `vs. ${parsed.previousMonth.toLowerCase()} ${deltaProBono >= 0 ? '+' : ''}${fmtDkk(deltaProBono)} kr.` : 'Ingen forrige måned', cls: totalProBonoDkk ? 'bad' : 'good' },
+    { label:'Kunder over budget', value:String(overCount), sub:`af ${clients.filter(c => c.agreed > 0).length} kunder med budget`, delta: parsed.previousMonth ? `advarsel: ${clients.filter(c => c.proBonoHours===0 && c.progress >= 75 && c.agreed > 0).length} kunder` : '—', cls: overCount ? 'bad' : 'good' }
+  ].map(card => `
+    <div class="card">
+      <div class="eyebrow">${card.label}</div>
+      <div class="metric ${card.cls}">${card.value}</div>
+      <div class="muted">${card.sub}</div>
+      <div class="divider"></div>
+      <div class="delta ${card.delta.includes('+') ? 'good' : card.delta.includes('-') ? 'bad' : 'muted'}">${card.delta}</div>
+    </div>`).join('');
+  renderConsultants(resources, clients);
+  renderBars('usageBars', [...clients].sort((a,b) => b.used - a.used).slice(0,8).map(c => ({ name: c.name, used: c.used })), 'used', _ => 'linear-gradient(90deg,#12dfab,#1dd1a1)', v => `${fmt1(v)} t`);
+  renderBars('proBonoBars', [...clients].sort((a,b) => b.proBonoHours - a.proBonoHours).slice(0,8).map(c => ({ name: c.name, proBonoHours: c.proBonoHours })), 'proBonoHours', i => i.proBonoHours > 0 ? 'linear-gradient(90deg,#ff6b6b,#fb7185)' : 'linear-gradient(90deg,#334155,#475569)', v => `${fmt1(v)} t`);
   document.getElementById('clientTable').innerHTML = clients.map(c => {
     const progressWidth = Math.min(100, Math.max(0, c.progress));
-    const progressColor = c.progress > 100 ? 'linear-gradient(90deg,#ff5f6d,#fb7185)' : c.progress >= 75 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#10d19b,#34d399)';
+    const progressColor = c.progress > 100 ? 'linear-gradient(90deg,#ff6b6b,#fb7185)' : c.progress >= 75 ? 'linear-gradient(90deg,#ffb11a,#f59e0b)' : 'linear-gradient(90deg,#12dfab,#1dd1a1)';
     const deltaText = parsed.previousMonth ? `${c.deltaPrev >= 0 ? '+' : ''}${fmt1(c.deltaPrev)} t` : '—';
     const deltaClass = c.deltaPrev > 0 ? 'bad' : c.deltaPrev < 0 ? 'good' : 'muted';
     return `
@@ -269,8 +347,7 @@ async function render(){
   }).join('');
 }
 render().catch(err => {
-  document.getElementById('heroStat').textContent = 'Load error';
-  document.getElementById('heroCopy').textContent = err.message || String(err);
+  document.getElementById('summaryCards').innerHTML = `<div class="card"><div class="eyebrow">Load error</div><div class="metric bad">Fejl</div><div class="muted">${esc(err.message || String(err))}</div></div>`;
 });
 </script>
 </body>
