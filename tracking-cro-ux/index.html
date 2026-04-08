@@ -48,7 +48,7 @@
   </div>
 
   <div class="panel">
-    <div class="section-title">Projektoversigt</div>
+    <div class="section-title">Projektstatus total</div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -115,14 +115,15 @@ async function load(){
     if (client === 'intern') return false;
     return true;
   };
-  const currentRows = data.filter(r => String(r.month || '').toLowerCase().includes(currentMonthEnglish)).filter(isExternalClientProject);
-  const previousRows = data.filter(r => String(r.month || '').toLowerCase().includes(previousMonthEnglish)).filter(isExternalClientProject);
-  const rows = currentRows.length ? currentRows : previousRows;
+  const allRows = data.filter(isExternalClientProject);
+  const currentRows = allRows.filter(r => String(r.month || '').toLowerCase().includes(currentMonthEnglish));
+  const previousRows = allRows.filter(r => String(r.month || '').toLowerCase().includes(previousMonthEnglish));
+  const monthlyRows = currentRows.length ? currentRows : previousRows;
   const activeMonthLabel = currentRows.length ? currentMonthName : `${previousMonthName} (seneste i kilden)`;
   const previousCompare = previousRows.length ? previousRows : [];
 
   const grouped = new Map();
-  for (const r of rows) {
+  for (const r of allRows) {
     const key = String(r.project || '').trim().toLowerCase();
     const agreed = num(r.agreedHours);
     const used = num(r.usedHours);
@@ -136,7 +137,7 @@ async function load(){
     grouped.set(key, existing);
   }
 
-  const projects = [...grouped.values()].map(r => {
+  const totalProjects = [...grouped.values()].map(r => {
     const usedPct = r.agreed > 0 ? (r.used / r.agreed) * 100 : 0;
     const billableHours = r.agreed > 0 ? Math.min(r.used, r.agreed) : 0;
     const overrunHours = r.agreed > 0 ? Math.max(0, r.used - r.agreed) : 0;
@@ -147,15 +148,33 @@ async function load(){
     return { ...r, usedPct, billableHours, overrunHours, overrunDkk, status };
   }).sort((a,b) => b.overrunHours - a.overrunHours || b.used - a.used);
 
+  const monthlyGrouped = new Map();
+  for (const r of monthlyRows) {
+    const key = String(r.project || '').trim().toLowerCase();
+    const agreed = num(r.agreedHours);
+    const used = num(r.usedHours);
+    const existing = monthlyGrouped.get(key) || { ...r, agreed: 0, used: 0 };
+    existing.agreed = Math.max(existing.agreed, agreed);
+    existing.used += used;
+    monthlyGrouped.set(key, existing);
+  }
+  const monthlyProjects = [...monthlyGrouped.values()].map(r => {
+    const usedPct = r.agreed > 0 ? (r.used / r.agreed) * 100 : 0;
+    const billableHours = r.agreed > 0 ? Math.min(r.used, r.agreed) : 0;
+    const overrunHours = r.agreed > 0 ? Math.max(0, r.used - r.agreed) : 0;
+    const overrunDkk = overrunHours * HOURLY_RATE;
+    return { ...r, usedPct, billableHours, overrunHours, overrunDkk };
+  }).sort((a,b) => b.overrunHours - a.overrunHours || b.used - a.used);
+
   const prevUsed = previousCompare.reduce((a,r) => a + num(r.usedHours), 0);
-  const totalUsed = projects.reduce((a,r) => a + r.used, 0);
-  const totalBillableHours = projects.reduce((a,r) => a + r.billableHours, 0);
-  const totalOverrunHours = projects.reduce((a,r) => a + r.overrunHours, 0);
-  const totalOverrunDkk = projects.reduce((a,r) => a + r.overrunDkk, 0);
-  const overrunProjects = projects.filter(r => r.overrunHours > 0).length;
+  const totalUsed = monthlyProjects.reduce((a,r) => a + r.used, 0);
+  const totalBillableHours = monthlyProjects.reduce((a,r) => a + r.billableHours, 0);
+  const totalOverrunHours = monthlyProjects.reduce((a,r) => a + r.overrunHours, 0);
+  const totalOverrunDkk = monthlyProjects.reduce((a,r) => a + r.overrunDkk, 0);
+  const overrunProjects = monthlyProjects.filter(r => r.overrunHours > 0).length;
 
   document.getElementById('summaryCards').innerHTML = [
-    { label:'Aktiv måned', value:activeMonthLabel, sub:`${projects.length} projekter for Lana`, delta: currentRows.length ? `sammenlignes mod ${previousMonthName}` : 'April mangler i kilden lige nu', cls:'accent' },
+    { label:'Aktiv måned', value:activeMonthLabel, sub:`${monthlyProjects.length} eksterne projekter i måneden`, delta: currentRows.length ? `sammenlignes mod ${previousMonthName}` : 'April mangler i kilden lige nu', cls:'accent' },
     { label:'Timer registreret', value:`${fmt1(totalUsed)}t`, sub:'Samlet brugt tid på Lana-projekter', delta: previousCompare.length ? `vs. ${previousMonthName} ${totalUsed - prevUsed >= 0 ? '+' : ''}${fmt1(totalUsed - prevUsed)}t` : 'Ingen forrige måned', cls:'accent' },
     { label:'Fakturerbar tid', value:`${fmt1(totalBillableHours)}t`, sub:'One time: maks. op til aftalte timer', delta:`${fmtDkk(totalBillableHours * HOURLY_RATE)} kr.`, cls:'good' },
     { label:'Ekstra pro bono', value:`${fmt1(totalOverrunHours)}t`, sub:`${overrunProjects} projekter over aftalt tid`, delta:`${fmtDkk(totalOverrunDkk)} kr.`, cls:totalOverrunHours ? 'bad' : 'good' }
@@ -168,10 +187,10 @@ async function load(){
       <div class="delta ${String(card.delta).includes('+') ? 'good' : String(card.delta).includes('-') ? 'bad' : 'muted'}">${esc(card.delta)}</div>
     </div>`).join('');
 
-    renderBars('overrunBars', projects.filter(p => p.overrunHours > 0).slice(0,8).map(p => ({ name: p.project, value: p.overrunHours })), 'value', _ => 'linear-gradient(90deg,#ff6b6b,#fb7185)', v => `${fmt1(v)} t`);
-    renderBars('usageBars', [...projects].sort((a,b) => b.used - a.used).slice(0,8).map(p => ({ name: p.project, value: p.used })), 'value', _ => 'linear-gradient(90deg,#12dfab,#1dd1a1)', v => `${fmt1(v)} t`);
+    renderBars('overrunBars', monthlyProjects.filter(p => p.overrunHours > 0).slice(0,8).map(p => ({ name: p.project, value: p.overrunHours })), 'value', _ => 'linear-gradient(90deg,#ff6b6b,#fb7185)', v => `${fmt1(v)} t`);
+    renderBars('usageBars', [...monthlyProjects].sort((a,b) => b.used - a.used).slice(0,8).map(p => ({ name: p.project, value: p.used })), 'value', _ => 'linear-gradient(90deg,#12dfab,#1dd1a1)', v => `${fmt1(v)} t`);
 
-    document.getElementById('projectTable').innerHTML = projects.map(p => `
+    document.getElementById('projectTable').innerHTML = totalProjects.map(p => `
       <tr>
         <td>${esc(p.project)}</td>
         <td>${esc(p.client)}</td>
