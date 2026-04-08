@@ -1,64 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="da">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iternum Dashboard Suite</title>
+  <title>Iternum Dashboards</title>
   <style>
     :root {
       --bg: #0b1020;
       --panel: #121a2f;
       --text: #f4f7fb;
       --muted: #98a4c0;
-      --accent: #6f7cff;
       --border: rgba(255,255,255,.08);
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1020 0%,#0d1327 100%);color:var(--text)}
-    .wrap{max-width:1100px;margin:0 auto;padding:40px 28px}
-    h1{margin:0 0 8px;font-size:32px}
-    .sub{color:var(--muted);max-width:70ch;line-height:1.6;margin-bottom:28px}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-    .card{display:block;text-decoration:none;color:inherit;background:rgba(18,26,47,.92);border:1px solid var(--border);border-radius:20px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
-    .eyebrow{color:#aab6d3;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-    .title{font-size:22px;font-weight:700;margin-bottom:8px}
-    .copy{color:var(--muted);line-height:1.55}
-    .path{margin-top:14px;color:var(--accent);font-size:14px}
-    .note{margin-top:28px;color:var(--muted);line-height:1.6}
-    @media (max-width:720px){.grid{grid-template-columns:1fr}.wrap{padding:24px 18px}}
+    .wrap{max-width:900px;margin:0 auto;padding:48px 28px}
+    .panel{background:rgba(18,26,47,.92);border:1px solid var(--border);border-radius:22px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+    h1{margin:0 0 10px;font-size:32px}
+    p{color:var(--muted);line-height:1.7;margin:0 0 14px}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Iternum Dashboard Suite</h1>
-    <div class="sub">Separate GitHub Pages-ready dashboard suite. Each dashboard is its own standalone page and mirrors the visual style of the existing Iternum live dashboard frontend.</div>
-    <div class="grid">
-      <a class="card" href="./coo-master/">
-        <div class="eyebrow">COO</div>
-        <div class="title">COO Master Dashboard</div>
-        <div class="copy">Cross-department overview with capacity, risk, klippekort, medgået tid, and missing tracking sections.</div>
-        <div class="path">/coo-master/</div>
-      </a>
-      <a class="card" href="./google-ads/">
-        <div class="eyebrow">Team Lead</div>
-        <div class="title">Google Ads Dashboard</div>
-        <div class="copy">Standalone Google Ads operations view in the same dark executive UI style.</div>
-        <div class="path">/google-ads/</div>
-      </a>
-      <a class="card" href="./seo/">
-        <div class="eyebrow">Team Lead</div>
-        <div class="title">SEO Dashboard</div>
-        <div class="copy">Standalone SEO dashboard with department-specific live data view.</div>
-        <div class="path">/seo/</div>
-      </a>
-      <a class="card" href="./social-media/">
-        <div class="eyebrow">Team Lead</div>
-        <div class="title">Social Media Dashboard</div>
-        <div class="copy">Standalone Social Media dashboard with the same frontend style and data pattern.</div>
-        <div class="path">/social-media/</div>
-      </a>
+    <div class="panel">
+      <h1>Iternum Dashboards</h1>
+      <p>Dashboardmiljøet er opdelt i separate URL’er.</p>
+      <p>Afdelingssiderne linker ikke til hinanden. Hvis der er behov for reel adgangskontrol mellem afdelinger, skal de flyttes fra offentlig GitHub Pages til privat hosting med login.</p>
     </div>
-    <div class="note">Deploy this folder as the root of a GitHub Pages site or inside a repo path. Each dashboard is already split into its own folder with <code>index.html</code>.</div>
   </div>
 </body>
 </html>

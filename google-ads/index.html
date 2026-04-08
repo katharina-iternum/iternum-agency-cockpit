@@ -1,138 +1,159 @@
 <!doctype html>
-<html lang="en">
+<html lang="da">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iternum Live Department Dashboards</title>
+  <title>Google Ads · Kundetidsoverblik</title>
   <style>
     :root {
       --bg: #0b1020;
-      --panel: #121a2f;
-      --panel-2: #18223d;
+      --panel: #121826;
+      --panel-2: #0f1723;
+      --panel-3: #1a2335;
       --text: #f4f7fb;
       --muted: #98a4c0;
       --accent: #6f7cff;
-      --green: #2dd4bf;
+      --green: #10d19b;
       --yellow: #f59e0b;
-      --red: #f87171;
+      --red: #ff5f6d;
       --border: rgba(255,255,255,.08);
     }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1020 0%,#0d1327 100%);color:var(--text)}
-    .wrap{max-width:1440px;margin:0 auto;padding:28px}.topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}.controls,.tabs{display:flex;gap:10px;flex-wrap:wrap}
-    h1{margin:0;font-size:28px}.sub{color:var(--muted);margin-top:6px} button{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 14px;cursor:pointer;font-size:14px}.tab.active{background:var(--accent);border-color:transparent}
-    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-bottom:18px}.card,.panel{background:rgba(18,26,47,.92);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.22)}
-    .eyebrow{color:#aab6d3;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}.hero-stat{font-size:42px;font-weight:800;letter-spacing:-.03em;margin:8px 0}.hero-copy,.label,.delta,.bar-value,th{color:var(--muted)}
-    .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.mini-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:12px}.grid-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-bottom:22px}.metric{font-size:32px;font-weight:700}.good{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}
-    .layout{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-bottom:18px}.section-title{margin:6px 0 14px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}.bars{display:flex;flex-direction:column;gap:12px}.bar-row{display:grid;grid-template-columns:190px 1fr 90px;gap:12px;align-items:center}.bar-label{color:#dbe4ff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-track{height:12px;background:var(--panel-2);border-radius:999px;overflow:hidden}.bar-fill{height:100%;border-radius:999px}
-    table{width:100%;border-collapse:collapse} th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:14px} tr:last-child td{border-bottom:none}.pill{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:600}.pill.red{background:rgba(248,113,113,.14);color:var(--red)}.pill.yellow{background:rgba(245,158,11,.16);color:var(--yellow)}.pill.green{background:rgba(45,212,191,.14);color:var(--green)}
-    @media (max-width:1100px){.hero,.layout{grid-template-columns:1fr}.grid-cards{grid-template-columns:repeat(2,minmax(0,1fr))}} @media (max-width:720px){.wrap{padding:18px}.grid-cards{grid-template-columns:1fr}.bar-row{grid-template-columns:120px 1fr 70px}.topbar{flex-direction:column}}
-    .suite-nav{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 20px}
-    .suite-nav a{border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 14px;cursor:pointer;font-size:14px;text-decoration:none}
-    .suite-nav a.active{background:var(--accent);border-color:transparent}
-
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1020 0%,#0d1327 100%);color:var(--text)}
+    .wrap{max-width:1580px;margin:0 auto;padding:28px}
+    .header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}
+    h1{margin:0;font-size:32px}
+    .sub{margin-top:8px;color:var(--muted);line-height:1.5;max-width:78ch}
+    .panel,.card{background:rgba(18,24,38,.94);border:1px solid var(--border);border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.24)}
+    .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-bottom:18px}
+    .panel{padding:20px}
+    .eyebrow{color:#aab6d3;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+    .hero-stat{font-size:44px;font-weight:800;letter-spacing:-.03em;margin:8px 0}
+    .muted{color:var(--muted)}
+    .mini-grid,.cards{display:grid;gap:14px}
+    .mini-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px}
+    .mini-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}
+    .card{padding:18px}
+    .label{color:var(--muted);font-size:13px}
+    .metric{font-size:34px;font-weight:800;margin-top:8px}
+    .good{color:var(--green)} .warn{color:var(--yellow)} .bad{color:var(--red)}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .section-title{margin:0 0 14px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+    .bars{display:flex;flex-direction:column;gap:12px}
+    .bar-row{display:grid;grid-template-columns:220px 1fr 90px;gap:12px;align-items:center}
+    .bar-label{color:#dbe4ff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .bar-track{height:12px;background:var(--panel-3);border-radius:999px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px}
+    .bar-value{color:var(--muted);text-align:right}
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1100px}
+    th,td{text-align:left;padding:16px 14px;border-bottom:1px solid var(--border);font-size:14px}
+    th{color:var(--muted);background:rgba(8,12,18,.55);position:sticky;top:0;text-transform:uppercase;letter-spacing:.04em}
+    tr:last-child td{border-bottom:none}
+    td.num{text-align:right;font-variant-numeric:tabular-nums}
+    .client{font-size:18px;font-weight:700}
+    .projects{color:var(--muted);font-size:12px;margin-left:6px}
+    .progress{height:12px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;min-width:180px}
+    .progress > span{display:block;height:100%;border-radius:999px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;font-weight:700;font-size:12px;white-space:nowrap}
+    .pill.green{background:rgba(16,209,155,.14);color:var(--green)}
+    .pill.yellow{background:rgba(245,158,11,.16);color:var(--yellow)}
+    .pill.red{background:rgba(255,95,109,.14);color:var(--red)}
+    .mono{font-variant-numeric:tabular-nums}
+    .note{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}
+    @media (max-width:1200px){.hero,.layout,.cards{grid-template-columns:1fr 1fr}.mini-grid{grid-template-columns:1fr}.bar-row{grid-template-columns:160px 1fr 70px}}
+    @media (max-width:860px){.hero,.layout,.cards{grid-template-columns:1fr}.wrap{padding:18px}.header{flex-direction:column}}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar">
+  <div class="header">
     <div>
-      <h1>Iternum Live Department Dashboards</h1>
-      <div class="sub">Live frontend pulling directly from the public Google Sheets team + Harvest sources.</div>
+      <div class="eyebrow">Afdelingsdashboard</div>
+      <h1>Google Ads · Kundetidsoverblik</h1>
+      <div class="sub">Viser hvilke kunder der bruger for meget tid i Google Ads. Pro bono beregnes som overforbrugte timer × 1.145 DKK/time. Dashboardet er kun bygget på Google Ads-kilden og linker ikke videre til andre afdelinger.</div>
     </div>
-    
-  </div>
-
-  
-  <div class="suite-nav">
-    <a href="../">Dashboard Suite</a>
-    <a href="../coo-master/">COO Master</a>
-    <a href="../google-ads/" class="active">Google Ads</a>
-    <a href="../seo/">SEO</a>
-    <a href="../social-media/">Social Media</a>
   </div>
 
   <div class="hero">
     <div class="panel">
-      <div class="eyebrow">Live overview</div>
-      <h3 id="heroTitle" style="font-size:28px;margin:0 0 8px;">COO Master Dashboard</h3>
-      <div class="hero-stat" id="heroStat">Loading…</div>
-      <div class="hero-copy" id="heroCopy">This live version is currently powered by the Harvest department sheets and updates directly from Google Sheets.</div>
+      <div class="eyebrow">Månedsoverblik</div>
+      <div class="hero-stat" id="heroStat">Loader…</div>
+      <div class="muted" id="heroCopy">Henter live data fra afdelingens Google Sheet.</div>
       <div class="mini-grid">
-        <div class="mini-card"><div class="label">Month column</div><div id="heroMonth">—</div></div>
-        <div class="mini-card"><div class="label">Source</div><div id="heroFocus">Live Sheets</div></div>
+        <div class="mini-card"><div class="label">Måned</div><div id="heroMonth">—</div></div>
+        <div class="mini-card"><div class="label">Timepris</div><div>1.145 DKK</div></div>
+        <div class="mini-card"><div class="label">Datakilde</div><div>Google Ads afdeling</div></div>
       </div>
     </div>
     <div class="panel">
-      <div class="eyebrow">Department comparison</div>
-      <h3>Used hours by department</h3>
-      <div class="bars" id="departmentBars"></div>
+      <div class="section-title">Ledelsesfokus</div>
+      <div class="bars" id="focusBars"></div>
+      <div class="note">Fremhæver de kunder med størst tidsforbrug og størst pro bono-risiko i denne afdeling.</div>
     </div>
   </div>
 
-  <div class="grid-cards" id="cards"></div>
+  <div class="cards" id="cards"></div>
 
   <div class="layout">
     <div class="panel">
-      <div class="section-title">Usage</div>
-      <h3 id="usageTitle">Top consumed clients</h3>
+      <div class="section-title">Mest tidsforbrug</div>
       <div class="bars" id="usageBars"></div>
     </div>
     <div class="panel">
-      <div class="section-title">Risk</div>
-      <h3 id="riskTitle">Most overdelivered / lowest remaining</h3>
-      <div class="bars" id="riskBars"></div>
+      <div class="section-title">Størst pro bono</div>
+      <div class="bars" id="proBonoBars"></div>
     </div>
   </div>
 
-  <div class="layout" style="grid-template-columns:1fr 1fr;">
-    <div class="panel">
-      <div class="section-title">Priority list</div>
-      <h3>At-risk clients</h3>
-      <table><thead><tr><th>Client</th><th>Agreed</th><th>Used</th><th>Status</th></tr></thead><tbody id="clientTable"></tbody></table>
-    </div>
-    <div class="panel">
-      <div class="section-title">Actions</div>
-      <h3>Suggested actions</h3>
-      <table><thead><tr><th>Area</th><th>Action</th></tr></thead><tbody id="actionTable"></tbody></table>
-    </div>
-  </div>
-
-  <div class="layout" style="grid-template-columns:1fr 1fr 1fr;">
-    <div class="panel">
-      <div class="section-title">COO special view</div>
-      <h3>Klippekort overview</h3>
-      <table><thead><tr><th>Project</th><th>Agreed</th><th>Left</th></tr></thead><tbody id="klippekortTable"></tbody></table>
-    </div>
-    <div class="panel">
-      <div class="section-title">COO special view</div>
-      <h3>Medgået tid overview</h3>
-      <table><thead><tr><th>Project</th><th>Used</th><th>Status</th></tr></thead><tbody id="medgaaetTable"></tbody></table>
-    </div>
-    <div class="panel">
-      <div class="section-title">COO special view</div>
-      <h3>Possible missing time tracking</h3>
-      <table><thead><tr><th>Project</th><th>Agreed</th><th>Used</th></tr></thead><tbody id="missingTable"></tbody></table>
+  <div class="panel">
+    <div class="section-title">Kunderessourceoversigt</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kunde</th>
+            <th>Aftalt (t)</th>
+            <th>Brugt (t)</th>
+            <th>Rest (t)</th>
+            <th>Fremgang</th>
+            <th>Vs. sidste måned</th>
+            <th>Pro bono (t)</th>
+            <th>Pro bono (DKK)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="clientTable"></tbody>
+      </table>
     </div>
   </div>
 </div>
 <script>
-const SOURCES = {
-  'COO Master': [
-    { dept: 'Google Ads', id: '10m2Ln9voBs260wihd_ySaFkHJ2ZA-EHOh0M7CLWqqyk', sheet: '2026 tidsforbrug' },
-    { dept: 'SEO', id: '1zOuU1JKN6OYQmlEULIKr7xUgBlz6Yl8TCV_SBpLzj-4', sheet: 'SEO 2026 tid' },
-    { dept: 'Social Media', id: '18zsYYyOQAaZJjFMNtkO4jcdgMS6xwxwi-Z7ml9F-skM', sheet: 'Social Media tid 2026' }
-  ],
-  'Google Ads': [{ dept: 'Google Ads', id: '10m2Ln9voBs260wihd_ySaFkHJ2ZA-EHOh0M7CLWqqyk', sheet: '2026 tidsforbrug' }],
-  'SEO': [{ dept: 'SEO', id: '1zOuU1JKN6OYQmlEULIKr7xUgBlz6Yl8TCV_SBpLzj-4', sheet: 'SEO 2026 tid' }],
-  'Social Media': [{ dept: 'Social Media', id: '18zsYYyOQAaZJjFMNtkO4jcdgMS6xwxwi-Z7ml9F-skM', sheet: 'Social Media tid 2026' }]
-};
-const tabs = Object.keys(SOURCES);
-const params = new URLSearchParams(location.search);
-let currentTab = 'Google Ads';
-const fmt = n => new Intl.NumberFormat('da-DK',{maximumFractionDigits:1}).format(n||0);
-function statusPill(kind,text){return `<span class="pill ${kind}">${text}</span>`}
-function num(v){ if(v==null||v==='') return 0; if(typeof v==='number') return v; return Number(String(v).replace('.','').replace(',','.'))||0; }
-function fetchGviz(id,sheet){
+const DEPARTMENT = 'Google Ads';
+const SHEET_ID = '10m2Ln9voBs260wihd_ySaFkHJ2ZA-EHOh0M7CLWqqyk';
+const SHEET_NAME = '2026 tidsforbrug';
+const HOURLY_RATE = 1145;
+const MONTH_RE = /januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december/i;
+const fmt1 = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
+const fmtPct = n => new Intl.NumberFormat('da-DK',{minimumFractionDigits:1,maximumFractionDigits:1}).format(Number(n||0));
+const fmtDkk = n => new Intl.NumberFormat('da-DK',{maximumFractionDigits:0}).format(Math.round(Number(n||0)));
+const num = v => { if(v==null||v==='') return 0; if(typeof v==='number') return v; return Number(String(v).replace(/\./g,'').replace(',','.')) || 0; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function statusPill(kind, text){ return `<span class="pill ${kind}">${text}</span>`; }
+function sum(arr,key){ return arr.reduce((a,x)=>a + (+x[key] || 0), 0); }
+function groupBy(arr,keyFn){ return arr.reduce((acc,item)=>((acc[keyFn(item)] ??= []).push(item), acc), {}); }
+function renderBars(elId, items, valueKey, colorFn, formatFn){
+  const el = document.getElementById(elId);
+  const max = Math.max(...items.map(x => Math.abs(x[valueKey]) || 0), 1);
+  el.innerHTML = items.map(item => `
+    <div class="bar-row">
+      <div class="bar-label">${esc(item.name)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(6, Math.round(Math.abs(item[valueKey]) / max * 100))}%;background:${colorFn(item)}"></div></div>
+      <div class="bar-value">${formatFn(item[valueKey])}</div>
+    </div>`).join('');
+}
+async function fetchGviz(id, sheet){
   return new Promise((resolve, reject) => {
     const previous = window.google;
     const timeout = setTimeout(() => reject(new Error('GViz timeout')), 15000);
@@ -162,82 +183,90 @@ function fetchGviz(id,sheet){
     document.head.appendChild(script);
   });
 }
-function parseHarvest(label, raw){
-  const monthCol = raw.cols.find(c => /januar|februar|marts|april|maj|juni|juli|august|september|oktober|november|december/i.test(c)) || raw.cols[3] || 'Used';
-  const agreedIdx = 1, usedIdx = raw.cols.findIndex(c => c===monthCol), diffIdx = raw.cols.findIndex(c => /Differencen/i.test(c));
+function parseHarvest(raw){
+  const monthIndices = raw.cols.map((c, i) => MONTH_RE.test(c) ? i : -1).filter(i => i >= 0);
+  const currentIdx = monthIndices[0] ?? 3;
+  const previousIdx = monthIndices[1] ?? -1;
+  const currentMonth = raw.cols[currentIdx] || 'Aktuel måned';
+  const previousMonth = previousIdx >= 0 ? raw.cols[previousIdx] : null;
+  const agreedIdx = 1;
   const records = raw.rows
     .filter(r => r[0] && typeof r[0] !== 'number')
     .map(r => ({
-      dept: label,
       client: String(r[0]).trim(),
       agreed: num(r[agreedIdx]),
-      used: num(r[usedIdx]),
-      diff: diffIdx >= 0 ? num(r[diffIdx]) : (num(r[agreedIdx]) - num(r[usedIdx]))
+      used: num(r[currentIdx]),
+      previousUsed: previousIdx >= 0 ? num(r[previousIdx]) : 0,
+      notes: String(r[2] || '').trim()
     }))
-    .filter(r => r.client && (r.agreed || r.used || r.diff));
-  return { monthCol, records };
+    .filter(r => r.client && (r.agreed || r.used || r.previousUsed));
+  return { currentMonth, previousMonth, records };
 }
-function sum(arr,key){return arr.reduce((a,r)=>a+(+r[key]||0),0)}
-function groupBy(arr,keyFn){return arr.reduce((a,x)=>((a[keyFn(x)]??=[]).push(x),a),{})}
-function renderTabs(){}
-function renderBars(elId, items, valueKey, colorFn, formatFn){
-  const el=document.getElementById(elId); const max=Math.max(...items.map(x=>Math.abs(x[valueKey])||0),1);
-  el.innerHTML=items.map(item=>`<div class="bar-row"><div class="bar-label">${item.name}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(6,Math.round(Math.abs(item[valueKey])/max*100))}%;background:${colorFn(item)}"></div></div><div class="bar-value">${formatFn(item[valueKey])}</div></div>`).join('');
+function buildClientAgg(records){
+  return Object.entries(groupBy(records, r => r.client)).map(([name, rs]) => {
+    const agreed = sum(rs, 'agreed');
+    const used = sum(rs, 'used');
+    const previousUsed = sum(rs, 'previousUsed');
+    const remaining = agreed - used;
+    const progress = agreed > 0 ? (used / agreed) * 100 : 0;
+    const proBonoHours = Math.max(0, used - agreed);
+    const proBonoDkk = proBonoHours * HOURLY_RATE;
+    const deltaPrev = used - previousUsed;
+    let status = { kind: 'green', text: 'OK' };
+    if (agreed <= 0) status = { kind: 'yellow', text: 'Ingen budget' };
+    else if (progress > 100) status = { kind: 'red', text: 'Over 100%' };
+    else if (progress >= 75) status = { kind: 'yellow', text: '75–99%' };
+    return { name, agreed, used, previousUsed, remaining, progress, proBonoHours, proBonoDkk, deltaPrev, projects: rs.length, status };
+  }).sort((a,b) => (b.proBonoHours - a.proBonoHours) || (b.used - a.used));
 }
 async function render(){
-  renderTabs();
-  const defs=SOURCES[currentTab];
-  const datasets=[];
-  for (const d of defs) {
-    const raw = await fetchGviz(d.id, d.sheet);
-    datasets.push({ ...d, parsed: parseHarvest(d.dept, raw) });
-  }
-  const rows=datasets.flatMap(d=>d.parsed.records);
-  const monthLabel=datasets[0]?.parsed.monthCol||'Current';
-  const agreed=sum(rows,'agreed'), used=sum(rows,'used'), diff=sum(rows,'diff');
-  const over=rows.filter(r=>r.diff<0).length, warning=rows.filter(r=>r.diff>=0 && r.diff<=2).length, util=agreed? used/agreed*100:0;
-  document.getElementById('heroTitle').textContent = `${currentTab} Dashboard`;
-  document.getElementById('heroStat').textContent = `${fmt(used)} hrs used`;
-  document.getElementById('heroMonth').textContent = monthLabel;
-  document.getElementById('heroFocus').textContent = currentTab==='COO Master' ? 'Cross-department live view' : `${currentTab} live view`;
-  document.getElementById('heroCopy').textContent = currentTab==='COO Master' ? 'Live cross-department view built from the public Harvest sheets for Google Ads, SEO and Social Media.' : `Live ${currentTab} department view built directly from the department Harvest sheet.`;
+  const raw = await fetchGviz(SHEET_ID, SHEET_NAME);
+  const parsed = parseHarvest(raw);
+  const clients = buildClientAgg(parsed.records);
+  const totalAgreed = sum(clients, 'agreed');
+  const totalUsed = sum(clients, 'used');
+  const totalProBonoHours = sum(clients, 'proBonoHours');
+  const totalProBonoDkk = sum(clients, 'proBonoDkk');
+  const overCount = clients.filter(c => c.proBonoHours > 0).length;
+  const warningCount = clients.filter(c => c.proBonoHours === 0 && c.progress >= 75 && c.agreed > 0).length;
+  const util = totalAgreed > 0 ? totalUsed / totalAgreed * 100 : 0;
+
+  document.getElementById('heroStat').textContent = `${fmt1(totalUsed)} timer brugt`;
+  document.getElementById('heroMonth').textContent = parsed.currentMonth;
+  document.getElementById('heroCopy').textContent = `${overCount} kunder er over budget i ${DEPARTMENT}. Samlet pro bono lige nu: ${fmt1(totalProBonoHours)} timer / ${fmtDkk(totalProBonoDkk)} DKK.`;
 
   document.getElementById('cards').innerHTML = [
-    ['Agreed Hours', fmt(agreed), 'Hours budgeted in the live source'],
-    ['Used Hours', fmt(used), 'Hours consumed in the month column'],
-    ['Remaining Hours', fmt(diff), 'Positive = remaining, negative = overdelivered', diff < 0 ? 'bad':'good'],
-    ['Utilization %', `${fmt(util)}%`, 'Used vs agreed hours', util > 90 ? 'warn':'good'],
-    ['At-Risk Clients', String(over + warning), `${over} overdelivered · ${warning} near limit`, (over+warning) ? 'bad':'good']
-  ].map(([l,v,n,c])=>`<div class="card"><div class="label">${l}</div><div class="metric ${c||''}">${v}</div><div class="delta">${n}</div></div>`).join('');
+    ['Kunder over budget', overCount, 'Kræver handling nu', overCount ? 'bad' : 'good'],
+    ['Advarsel 75–99%', warningCount, 'Tæt på budgetloft', warningCount ? 'warn' : 'good'],
+    ['Pro bono timer', `${fmt1(totalProBonoHours)} t`, 'Overforbrugte timer × 1.145 DKK', totalProBonoHours ? 'bad' : 'good'],
+    ['Pro bono værdi', `${fmtDkk(totalProBonoDkk)} DKK`, `Udnyttelse: ${fmtPct(util)}%`, totalProBonoDkk ? 'bad' : 'good']
+  ].map(([label, value, note, cls]) => `<div class="card"><div class="label">${label}</div><div class="metric ${cls}">${value}</div><div class="muted">${note}</div></div>`).join('');
 
-  const deptAgg = Object.entries(groupBy(rows, r=>r.dept)).map(([name, rs])=>({name, used: sum(rs,'used')})).sort((a,b)=>b.used-a.used);
-  renderBars('departmentBars', deptAgg, 'used', i => i.name===currentTab ? 'linear-gradient(90deg,#6f7cff,#8b5cf6)' : 'linear-gradient(90deg,#334155,#64748b)', v => `${fmt(v)} h`);
+  renderBars('focusBars', clients.slice(0,5).map(c => ({ name: c.name, value: c.proBonoHours > 0 ? c.proBonoHours : c.used })), 'value', i => i.value > 0 ? 'linear-gradient(90deg,#ff5f6d,#fb7185)' : 'linear-gradient(90deg,#10d19b,#34d399)', v => `${fmt1(v)} t`);
+  renderBars('usageBars', [...clients].sort((a,b) => b.used - a.used).slice(0,8).map(c => ({ name: c.name, used: c.used })), 'used', _ => 'linear-gradient(90deg,#10d19b,#34d399)', v => `${fmt1(v)} t`);
+  renderBars('proBonoBars', [...clients].sort((a,b) => b.proBonoHours - a.proBonoHours).slice(0,8).map(c => ({ name: c.name, proBonoHours: c.proBonoHours })), 'proBonoHours', i => i.proBonoHours > 0 ? 'linear-gradient(90deg,#ff5f6d,#fb7185)' : 'linear-gradient(90deg,#334155,#475569)', v => `${fmt1(v)} t`);
 
-  const clientAgg = Object.entries(groupBy(rows, r=>r.client)).map(([name, rs])=>({name, used: sum(rs,'used'), agreed: sum(rs,'agreed'), diff: sum(rs,'diff')}));
-  renderBars('usageBars', clientAgg.sort((a,b)=>b.used-a.used).slice(0,8), 'used', _=>'linear-gradient(90deg,#2dd4bf,#34d399)', v=>`${fmt(v)} h`);
-  renderBars('riskBars', clientAgg.sort((a,b)=>a.diff-b.diff).slice(0,8), 'diff', i=>i.diff<0?'linear-gradient(90deg,#f87171,#fb7185)':'linear-gradient(90deg,#f59e0b,#fbbf24)', v=>`${fmt(v)} h`);
-
-  document.getElementById('clientTable').innerHTML = clientAgg.sort((a,b)=>a.diff-b.diff).slice(0,10).map(c=>{
-    const status = c.diff < 0 ? statusPill('red','Over') : c.diff <= 2 ? statusPill('yellow','Warning') : statusPill('green','OK');
-    return `<tr><td>${c.name}</td><td>${fmt(c.agreed)}</td><td>${fmt(c.used)}</td><td>${status}</td></tr>`;
+  document.getElementById('clientTable').innerHTML = clients.map(c => {
+    const progressWidth = Math.min(100, Math.max(0, c.progress));
+    const progressColor = c.progress > 100 ? 'linear-gradient(90deg,#ff5f6d,#fb7185)' : c.progress >= 75 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#10d19b,#34d399)';
+    const deltaText = parsed.previousMonth ? `${c.deltaPrev >= 0 ? '+' : ''}${fmt1(c.deltaPrev)} t` : '—';
+    const deltaClass = c.deltaPrev > 0 ? 'bad' : c.deltaPrev < 0 ? 'good' : 'muted';
+    return `
+      <tr>
+        <td><span class="client">${esc(c.name)}</span><span class="projects">(${c.projects})</span></td>
+        <td class="num mono">${fmt1(c.agreed)}t</td>
+        <td class="num mono ${c.used > c.agreed && c.agreed > 0 ? 'bad' : 'good'}">${fmt1(c.used)}t</td>
+        <td class="num mono ${c.remaining < 0 ? 'bad' : 'muted'}">${c.remaining >= 0 ? '+' : ''}${fmt1(c.remaining)}t</td>
+        <td>
+          <div class="progress"><span style="width:${Math.max(0, progressWidth)}%;background:${progressColor}"></span></div>
+          <div class="mono muted" style="margin-top:8px">${fmtPct(c.progress)}%</div>
+        </td>
+        <td class="num mono ${deltaClass}">${deltaText}</td>
+        <td class="num mono ${c.proBonoHours > 0 ? 'bad' : 'muted'}">${c.proBonoHours > 0 ? fmt1(c.proBonoHours)+'t' : '—'}</td>
+        <td class="num mono ${c.proBonoDkk > 0 ? 'bad' : 'muted'}">${c.proBonoDkk > 0 ? fmtDkk(c.proBonoDkk) : '—'}</td>
+        <td>${statusPill(c.status.kind, c.status.text)}</td>
+      </tr>`;
   }).join('');
-
-  const actions = [
-    {area:'Overdelivery', text: over ? `${over} clients are already over their agreed hours and need action now.` : 'No clients are currently over their agreed hours.'},
-    {area:'Warning zone', text: warning ? `${warning} clients are close to their limit (≤2 hours remaining).` : 'No clients are close to the limit right now.'},
-    {area:'Focus', text: currentTab==='COO Master' ? 'Use this view to compare where intervention is needed across departments.' : `Use this view to rebalance workload and client scope inside ${currentTab}.`},
-    {area:'Data source', text: `Department comparison uses live Harvest sheet hours, summed by department. Google Ads is shown as summed hours, not split by consultant.`}
-  ];
-  document.getElementById('actionTable').innerHTML = actions.map(a=>`<tr><td>${a.area}</td><td>${a.text}</td></tr>`).join('');
-
-  const klippekort = clientAgg.filter(c => /klippekort/i.test(c.name)).sort((a,b)=>a.diff-b.diff).slice(0,12);
-  document.getElementById('klippekortTable').innerHTML = klippekort.length ? klippekort.map(c => `<tr><td>${c.name}</td><td>${fmt(c.agreed)}</td><td>${fmt(c.diff)}</td></tr>`).join('') : '<tr><td colspan="3">No klippekort rows in this live view.</td></tr>';
-
-  const medgaaet = clientAgg.filter(c => /medgået tid|medgaaet tid/i.test(c.name)).sort((a,b)=>b.used-a.used).slice(0,12);
-  document.getElementById('medgaaetTable').innerHTML = medgaaet.length ? medgaaet.map(c => `<tr><td>${c.name}</td><td>${fmt(c.used)}</td><td>${c.used > 0 ? statusPill('green','Tracked') : statusPill('yellow','No hours')}</td></tr>`).join('') : '<tr><td colspan="3">No “Medgået tid” rows in this live view.</td></tr>';
-
-  const missing = clientAgg.filter(c => c.agreed > 0 && c.used === 0).sort((a,b)=>b.agreed-a.agreed).slice(0,12);
-  document.getElementById('missingTable').innerHTML = missing.length ? missing.map(c => `<tr><td>${c.name}</td><td>${fmt(c.agreed)}</td><td>${fmt(c.used)}</td></tr>`).join('') : '<tr><td colspan="3">No obvious missing-tracking rows in this live view.</td></tr>';
 }
 render().catch(err => {
   document.getElementById('heroStat').textContent = 'Load error';
