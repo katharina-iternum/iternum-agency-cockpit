@@ -100,7 +100,7 @@
       <div class="bars" id="usageBars"></div>
     </div>
     <div class="panel">
-      <div class="section-title">Størst pro bono</div>
+      <div class="section-title">Lavest registreret ift. aftalt</div>
       <div class="bars" id="proBonoBars"></div>
     </div>
   </div>
@@ -376,7 +376,11 @@ async function render(){
     </div>`).join('');
   renderConsultants(resources, clients);
   renderBars('usageBars', [...clients].sort((a,b) => b.used - a.used).slice(0,8).map(c => ({ name: c.name, used: c.used })), 'used', _ => 'linear-gradient(90deg,#12dfab,#1dd1a1)', v => `${fmt1(v)} t`);
-  renderBars('proBonoBars', [...clients].sort((a,b) => b.proBonoHours - a.proBonoHours).slice(0,8).map(c => ({ name: c.name, proBonoHours: c.proBonoHours })), 'proBonoHours', i => i.proBonoHours > 0 ? 'linear-gradient(90deg,#ff6b6b,#fb7185)' : 'linear-gradient(90deg,#334155,#475569)', v => `${fmt1(v)} t`);
+  renderBars('proBonoBars', [...clients]
+    .filter(c => c.agreed > c.used)
+    .sort((a,b) => (b.agreed - b.used) - (a.agreed - a.used))
+    .slice(0,8)
+    .map(c => ({ name: c.name, missing: c.agreed - c.used })), 'missing', _ => 'linear-gradient(90deg,#ffb11a,#f59e0b)', v => `${fmt1(v)} t`);
   document.getElementById('clientTable').innerHTML = clients.map(c => {
     const progressWidth = Math.min(100, Math.max(0, c.progress));
     const progressColor = c.progress > 100 ? 'linear-gradient(90deg,#ff6b6b,#fb7185)' : c.progress >= 75 ? 'linear-gradient(90deg,#ffb11a,#f59e0b)' : 'linear-gradient(90deg,#12dfab,#1dd1a1)';
